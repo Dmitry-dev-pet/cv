@@ -2,6 +2,12 @@
 
 Coimbra, Portugal / dimkin3@gmail.com / Telegram: [dimkin3](https://t.me/dimkin3)
 
+## Live CV
+
+[dmitry-dev-pet.github.io/cv](https://dmitry-dev-pet.github.io/cv/)
+
+The GitHub Pages version is a responsive bilingual (EN/RU) CV with direct PDF and Markdown downloads.
+
 Working with practical LLM systems, scientific data analysis, speech-to-text and OCR workflows, and document automation.
 
 My background combines applied engineering with a scientific way of thinking: I care about how models behave, how outputs are evaluated, and how AI tools can be made useful in real workflows rather than left as prototypes.
