@@ -1,46 +1,68 @@
-# Dmitry Glukhov, AI Engineer
+# Dmitry Glukhov, AI / Software Engineer
 
-Coimbra, Portugal / dimkin3@gmail.com / Telegram: [dimkin3](https://t.me/dimkin3)
+Coimbra, Portugal / [dimkin3@gmail.com](mailto:dimkin3@gmail.com) / Telegram: [@dimkin3](https://t.me/dimkin3)
 
 ## Live CV
 
-[dmitry-dev-pet.github.io/cv](https://dmitry-dev-pet.github.io/cv/)
+- [English](https://dmitry-dev-pet.github.io/cv/?lang=en)
+- [Russian](https://dmitry-dev-pet.github.io/cv/?lang=ru)
+- [PDF](./Dmitry_Glukhov_AI_Engineer_CV.pdf)
 
-The GitHub Pages version is a responsive bilingual (EN/RU) CV with direct PDF and Markdown downloads.
+I build evidence-driven AI, data and research products. My recent work combines temporal data provenance, LLM evaluation, interactive scientific interfaces, historical media reconstruction, OCR/speech pipelines and local-first tools.
 
-Working with practical LLM systems, scientific data analysis, speech-to-text and OCR workflows, and document automation.
+## Current Featured Work
 
-My background combines applied engineering with a scientific way of thinking: I care about how models behave, how outputs are evaluated, and how AI tools can be made useful in real workflows rather than left as prototypes.
+### Reality Wiki
 
-## Education
+Private research prototype for preserving and replaying what was knowable at a specific moment.
 
-- Kazan National Research Technological University
-- Candidate of Sciences in Chemistry (PhD equivalent)
+- append-only epistemic ledger with publication, availability, ingestion and event time;
+- historical and operational as-of replay with SHA-256 evidence hashes;
+- official CBR and Rosstat source mirroring into SQLite, DuckDB and Parquet;
+- model-memory experiments with locked arms, Brier scoring and forward-only promotion gates;
+- browser research UI and append-only claim-level review.
 
-## Highlights
+### [Time Receiver](https://dmitry-dev-pet.github.io/time-receiver/)
 
-- LLM and RAG-like knowledge pipelines over messy real-world data.
-- OCR and speech-to-text workflows with stabilization of noisy partial results.
-- Document and content automation: extraction, Markdown/TXT generation, localization, editable deliverables, and QA artifacts.
-- Multi-provider AI integration: hosted models, local endpoints, provider routing, and quota-aware workflows.
-- Evaluation-minded development: validation, repair loops, operation logs, diagnostics, benchmark reports, and reproducible pipeline stages.
-- Production-oriented delivery: modular boundaries, tests, lint/type checks, local diagnostics, architecture notes, and reviewable artifacts.
+Static-first historical radio and television PWA for Moscow, 1940-1990.
 
-## Tools
+- 18,628 days, 4.09M radio events and 395K TV events;
+- 51 on-demand yearly data packs and an offline-capable shell;
+- explicit `EXACT`, `RECONSTRUCTED` and `EQUIVALENT` fidelity labels;
+- archival ingestion, matching and editorial-review pipelines;
+- Vue, TypeScript, Web Audio, PWA, SQLite and Vitest.
 
-- **Development:** Python, TypeScript, Swift, Rust, Docker, and command-line automation.
-- **AI:** OpenAI-compatible APIs, OpenRouter, Codex, Gemini, local LLM endpoints, prompt workflows, provider routing, OCR pipelines, speech-to-text, and validation/repair loops.
-- **Analytics:** SQLite, Postgres, Python analysis scripts, Matplotlib, PySCF, LAMMPS, benchmark reports, classifier calibration, and reproducible scientific/data-analysis pipelines.
+Public release repository: [time-receiver](https://github.com/Dmitry-dev-pet/time-receiver)
 
-## Featured Public Projects
+### [Form / Field](https://dmitry-dev-pet.github.io/form-field-lab/)
 
-- [ai-agent-case-studies](https://github.com/Dmitry-dev-pet/ai-agent-case-studies) — sanitized AI-agent and LLM workflow case studies, including a Telegram / LLM knowledge system.
-- [native-audio-translator](https://github.com/Dmitry-dev-pet/native-audio-translator) — native macOS live subtitle and translation prototype with speech-to-text and OCR pipelines.
-- [mermaid-compiler](https://github.com/Dmitry-dev-pet/mermaid-compiler) — AI-assisted Mermaid diagram generator, editor, validator, and repair workspace.
-- [dodo-table-events](https://github.com/Dmitry-dev-pet/dodo-table-events) — computer vision prototype for table occupancy events.
+Vue/Vite/p5.js laboratory for executable generative graphics.
 
-## Notes
+- research interface around 34 clearly attributed sketches by @yuruyurau;
+- code snapshot of 845 community works by 26 authors;
+- visible RAW code is the actual rendering source;
+- bounded generative genomes, manual 3D projection, topology tools and stateful entities;
+- 16 Node test modules and automated GitHub Pages deployment.
 
-Some current work is private. This repository summarizes the technical shape of that work without exposing private data, credentials, client materials, or closed-source code.
+Public source: [form-field-lab](https://github.com/Dmitry-dev-pet/form-field-lab)
 
-Main GitHub profile: [Dmitry-dev-pet](https://github.com/Dmitry-dev-pet)
+### [Native Audio Translator](https://github.com/Dmitry-dev-pet/native-audio-translator)
+
+Native macOS prototype for live audio translation and OCR subtitle overlays, with noisy partial-result stabilization, runtime permissions and local diagnostics.
+
+### [Feynman Reader](https://dmitry-dev-pet.github.io/feynman-reader/)
+
+Bilingual static reader for three volumes and 115 chapters, with 12,644 formulas, 1,038 figures, media manifests, generated study materials and validation tooling.
+
+## Earlier Public AI Work
+
+- [ai-agent-case-studies](https://github.com/Dmitry-dev-pet/ai-agent-case-studies) - restartable Telegram-to-wiki LLM pipeline with state, retries, token visibility and operational diagnostics.
+- [mermaid-compiler](https://github.com/Dmitry-dev-pet/mermaid-compiler) - AI-assisted Mermaid workspace with validation, repair loops and multi-provider routing.
+
+## Stack
+
+TypeScript, Python, Swift, Rust, Vue, React, Vite, SQLite, Postgres, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, OCR, speech-to-text, temporal replay, evaluation and reproducible data workflows.
+
+## Privacy And Attribution
+
+Private projects are summarized without exposing private data, credentials or closed-source implementation details. Third-party source material and artworks remain attributed to their original authors; the portfolio describes the engineering and research interfaces built around them.

@@ -5,16 +5,16 @@ const translations = {
     download: "Download",
     downloadPdf: "PDF résumé",
     downloadMd: "Markdown source",
-    role: "AI / Software Engineer — LLM systems, OCR, speech and scientific evaluation",
+    role: "AI / Software Engineer — evidence-driven systems and interactive research products",
     heroStatement:
-      "I build AI workflows as engineering systems: with state, validation, diagnostics and useful artifacts — not as one-off prompts.",
+      "I turn complex sources, models and data into inspectable products with explicit provenance, validation and useful interfaces.",
     contactAction: "Start a conversation",
     contactHeading: "Contact",
     location: "Coimbra, Portugal · Europe/Lisbon",
     signalHeading: "At a glance",
     signalOne: "PhD-equivalent background in chemistry",
-    signalTwo: "LLM · OCR · speech · scientific evaluation",
-    signalThree: "Local-first and multi-provider systems",
+    signalTwo: "Temporal evidence · LLM evaluation · data pipelines",
+    signalThree: "Interactive web · PWA · local-first systems",
     signalFour: "Evidence and reproducibility over hype",
     approachHeading: "How I work",
     approachOne: "Turn ambiguous tasks into inspectable pipelines.",
@@ -23,42 +23,52 @@ const translations = {
     skillsHeading: "Core stack",
     summaryHeading: "Profile",
     summaryLead:
-      "AI / Software Engineer focused on practical LLM systems, OCR and document automation, speech-to-text workflows, scientific evaluation pipelines and local-first developer tools.",
+      "AI / Software Engineer building evidence-driven AI, data and research products — from cutoff-safe knowledge systems to historical media and executable generative graphics.",
     summaryBody:
-      "My strength is the layer around the model: ingestion, normalization, staged processing, durable state, validation and repair loops, retries, diagnostics, cost visibility and reproducible outputs.",
+      "My strength is the whole system around the model or dataset: acquisition, provenance, state, evaluation, failure boundaries, interaction design and reproducible delivery.",
     principle: "The model is a component. The product is the complete, observable workflow.",
     projectsHeading: "Selected systems",
-    caseStudy: "Public case study",
+    privateResearch: "Private R&D · summarized",
+    publicProduct: "Live product · public release",
+    publicLab: "Live laboratory · public source",
     publicRepo: "Public repository",
-    privateWork: "Private work · summarized",
-    telegramTitle: "Telegram / LLM knowledge system",
-    telegramRole: "Pipeline architecture · knowledge extraction · operations",
-    telegramOne:
-      "Turns raw Telegram exports into normalized blocks, structured knowledge and a readable Markdown wiki.",
-    telegramTwo:
-      "Uses SQLite as source of truth for restartable stages, intermediate state and assistant routing policies.",
-    telegramThree:
-      "Control Center exposes progress, token spend, retries, failures, stale heartbeats and diagnostic artifacts.",
-    audioTitle: "Native Audio Translator",
+    publicRelease: "Public reader release",
+    earlierWork: "Earlier public AI work",
+    realityTitle: "Reality Wiki — temporal evidence and model memory",
+    realityOne:
+      "Append-only epistemic ledger separates publication, availability, ingestion and event time; replay hashes make visible evidence reproducible.",
+    realityTwo:
+      "Mirrors and normalizes official CBR and Rosstat sources into cutoff-safe analytical layers with explicit provenance.",
+    realityThree:
+      "Includes a 26-origin, 104-question-per-arm walk-forward memory study and a stricter forward-only experiment; retrospective results are explicitly not presented as forecasting skill.",
+    timeOne:
+      "Static-first historical media PWA covering Moscow radio and television across 18,628 days from 1940 to 1990.",
+    timeTwo:
+      "Packages 4.09M radio and 395K TV events into 51 on-demand yearly bundles, with an offline-capable application shell.",
+    timeThree:
+      "Keeps exact schedules, reconstructed gaps and equivalent media visibly distinct; archival ingestion and editorial review fail closed.",
+    formOne:
+      "Research interface around 34 clearly attributed p5.js sketches and a code snapshot of 845 community works by 26 authors.",
+    formTwo:
+      "Runs the visible RAW code directly, compiles bounded generative genomes and adds manual 3D projection, topology tools and stateful entities.",
+    formThree:
+      "Responsive lab, archive, evolution and theory surfaces backed by 16 Node test modules and an automated Pages deployment.",
     audioOne:
       "Native macOS prototype for live subtitles and translation across audio, calls, presentations and text on screen.",
     audioTwo:
       "Separate audio and OCR pipelines stabilize noisy partial results before translation and overlay rendering.",
     audioThree:
       "Includes permissions, command control, diagnostics, validation executables and local app bundling.",
-    mermaidOne:
-      "AI-assisted workspace for generating, editing, validating, repairing and exporting technical diagrams.",
-    mermaidTwo:
-      "Separates chat, build, fix and analysis workflows; preserves prompt previews and operation logs.",
-    mermaidThree:
-      "Grounds generation in local documentation and routes across OpenRouter and local endpoints.",
-    scienceTitle: "Scientific benchmark and evaluation pipelines",
-    scienceBody:
-      "LAMMPS orchestration and water/ice NEP validation; classifier calibration, coexistence smoke tests and sensitivity reports. Quantum chemistry learning lab with PySCF, reproducible exports, Vue/3Dmol and guarded HF/DFT/MP2/UHF/CASSCF workflows.",
-    documentsTitle: "Document and presentation automation",
-    documentsBody:
-      "Structure-driven DOCX and deterministic PPTX generation with editable artifacts, computed diagrams, page-level visual QA, acceptance matrices and delivery packaging.",
-    viewCase: "View case study ↗",
+    feynmanBody:
+      "Built a bilingual static reader for three volumes and 115 chapters, with 12,644 formulas, 1,038 figures, media manifests, generated study materials, validation tooling and a responsive reading shell.",
+    earlierTitle: "LLM knowledge pipelines and developer tools",
+    earlierBody:
+      "A restartable Telegram-to-wiki knowledge pipeline with operational telemetry, plus an AI-assisted Mermaid workspace with validation, repair loops and multi-provider routing.",
+    liveProduct: "Live product ↗",
+    liveLab: "Live laboratory ↗",
+    liveReader: "Live reader ↗",
+    viewRelease: "Public release ↗",
+    viewCase: "Case study ↗",
     viewRepo: "View repository ↗",
     educationHeading: "Education",
     degree: "Candidate of Sciences in Chemistry",
@@ -73,16 +83,16 @@ const translations = {
     download: "Скачать",
     downloadPdf: "Резюме в PDF",
     downloadMd: "Исходник Markdown",
-    role: "AI / Software Engineer — LLM-системы, OCR, речь и научная оценка",
+    role: "AI / Software Engineer — доказательные системы и интерактивные исследовательские продукты",
     heroStatement:
-      "Строю AI-workflow как инженерные системы: с состоянием, валидацией, диагностикой и полезными артефактами — не как одноразовые промпты.",
+      "Превращаю сложные источники, модели и данные в проверяемые продукты с явным provenance, валидацией и полезным интерфейсом.",
     contactAction: "Обсудить задачу",
     contactHeading: "Контакты",
     location: "Коимбра, Португалия · Europe/Lisbon",
     signalHeading: "Главное",
     signalOne: "Учёная степень кандидата химических наук",
-    signalTwo: "LLM · OCR · речь · научная оценка",
-    signalThree: "Local-first и мультипровайдерные системы",
+    signalTwo: "Temporal evidence · LLM evaluation · data pipelines",
+    signalThree: "Интерактивный web · PWA · local-first systems",
     signalFour: "Доказательства и воспроизводимость вместо хайпа",
     approachHeading: "Как я работаю",
     approachOne: "Превращаю размытые задачи в проверяемые пайплайны.",
@@ -91,42 +101,52 @@ const translations = {
     skillsHeading: "Основной стек",
     summaryHeading: "Профиль",
     summaryLead:
-      "AI / Software Engineer с фокусом на прикладные LLM-системы, OCR и автоматизацию документов, speech-to-text, научные evaluation-пайплайны и local-first инструменты.",
+      "AI / Software Engineer, создающий доказательные AI-, data- и research-продукты — от cutoff-safe систем знаний до исторической медиасреды и исполняемой генеративной графики.",
     summaryBody:
-      "Моя сильная сторона — инженерный слой вокруг модели: ingestion, нормализация, поэтапная обработка, устойчивое состояние, validation/repair loops, retries, диагностика, контроль стоимости и воспроизводимые результаты.",
+      "Моя сильная сторона — вся система вокруг модели или датасета: получение данных, provenance, состояние, evaluation, отказобезопасные границы, interaction design и воспроизводимая поставка.",
     principle: "Модель — компонент. Продукт — полный наблюдаемый workflow.",
     projectsHeading: "Избранные системы",
-    caseStudy: "Публичный case study",
+    privateResearch: "Приватный R&D · описание",
+    publicProduct: "Живой продукт · публичный релиз",
+    publicLab: "Живая лаборатория · открытый код",
     publicRepo: "Публичный репозиторий",
-    privateWork: "Приватная работа · описание",
-    telegramTitle: "Telegram / LLM-система знаний",
-    telegramRole: "Архитектура пайплайна · извлечение знаний · эксплуатация",
-    telegramOne:
-      "Превращает сырые Telegram-экспорты в нормализованные блоки, структурированные знания и читаемую Markdown-wiki.",
-    telegramTwo:
-      "Использует SQLite как source of truth для перезапускаемых стадий, промежуточного состояния и политик маршрутизации ассистента.",
-    telegramThree:
-      "Control Center показывает прогресс, расход токенов, retries, ошибки, stale heartbeat и диагностические артефакты.",
-    audioTitle: "Native Audio Translator",
+    publicRelease: "Публичный reader-релиз",
+    earlierWork: "Предыдущие публичные AI-проекты",
+    realityTitle: "Reality Wiki — временные знания и память моделей",
+    realityOne:
+      "Append-only epistemic ledger разделяет время публикации, доступности, ingestion и события; хеши replay делают видимые доказательства воспроизводимыми.",
+    realityTwo:
+      "Зеркалирует и нормализует официальные источники ЦБ и Росстата в cutoff-safe аналитические слои с явным provenance.",
+    realityThree:
+      "Включает walk-forward исследование памяти на 26 origins и 104 вопросах на arm и более строгий forward-only эксперимент; ретроспективный результат явно не выдаётся за forecasting skill.",
+    timeOne:
+      "Static-first историческая PWA-медиасреда с радио- и телесеткой Москвы на 18 628 дней с 1940 по 1990 год.",
+    timeTwo:
+      "Упаковывает 4,09 млн радио- и 395 тыс. TV-событий в 51 подгружаемый годовой пакет с offline-capable app shell.",
+    timeThree:
+      "Визуально разделяет точную сетку, реконструированные пробелы и equivalent media; архивный ingestion и editorial review работают fail-closed.",
+    formOne:
+      "Исследовательский интерфейс вокруг 34 скетчей p5.js с точным авторством и code snapshot 845 работ сообщества от 26 авторов.",
+    formTwo:
+      "Напрямую исполняет показанный RAW-код, компилирует ограниченные по размеру генеративные геномы и добавляет ручную 3D-проекцию, topology tools и stateful entities.",
+    formThree:
+      "Адаптивные lab, archive, evolution и theory surfaces поддерживаются 16 Node test modules и автоматическим Pages-deploy.",
     audioOne:
       "Нативный macOS-прототип живых субтитров и перевода для аудио, звонков, презентаций и текста на экране.",
     audioTwo:
       "Раздельные audio- и OCR-пайплайны стабилизируют шумные частичные результаты до перевода и отрисовки overlay.",
     audioThree:
       "Включает permissions flow, управление командами, диагностику, validation executables и локальную сборку приложения.",
-    mermaidOne:
-      "AI-workspace для генерации, редактирования, проверки, исправления и экспорта технических диаграмм.",
-    mermaidTwo:
-      "Разделяет chat, build, fix и analyze-процессы; сохраняет prompt preview и журнал операций.",
-    mermaidThree:
-      "Использует локальную документацию для grounded generation и маршрутизирует запросы через OpenRouter и локальные endpoints.",
-    scienceTitle: "Научные benchmark- и evaluation-пайплайны",
-    scienceBody:
-      "Оркестрация LAMMPS и валидация water/ice NEP: калибровка классификатора, coexistence smoke tests и sensitivity-отчёты. Учебная лаборатория квантовой химии с PySCF, воспроизводимыми экспортами, Vue/3Dmol и защищёнными HF/DFT/MP2/UHF/CASSCF-workflow.",
-    documentsTitle: "Автоматизация документов и презентаций",
-    documentsBody:
-      "Генерация DOCX по структуре и детерминированная сборка PPTX: редактируемые артефакты, вычисляемые диаграммы, постраничный visual QA, acceptance matrices и delivery-пакеты.",
-    viewCase: "Открыть case study ↗",
+    feynmanBody:
+      "Построил двуязычный статический reader для трёх томов и 115 глав: 12 644 формулы, 1 038 рисунков, media manifests, генерируемые учебные материалы, validation tools и адаптивная оболочка чтения.",
+    earlierTitle: "LLM knowledge pipelines и developer tools",
+    earlierBody:
+      "Перезапускаемый Telegram-to-wiki knowledge pipeline с operational telemetry и AI-workspace для Mermaid с валидацией, repair loops и multi-provider routing.",
+    liveProduct: "Живой продукт ↗",
+    liveLab: "Живая лаборатория ↗",
+    liveReader: "Живой reader ↗",
+    viewRelease: "Публичный релиз ↗",
+    viewCase: "Case study ↗",
     viewRepo: "Открыть репозиторий ↗",
     educationHeading: "Образование",
     degree: "Кандидат химических наук",
