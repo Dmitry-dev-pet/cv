@@ -432,8 +432,7 @@ h1 {
   letter-spacing: 0.08em;
 }
 
-.project-copy h3,
-.education-row h3 {
+.project-copy h3 {
   margin: 0;
   color: var(--ink);
   font-size: 0.96rem;
@@ -487,25 +486,6 @@ h1 {
 
 .project-actions .project-link {
   margin-top: 0;
-}
-
-.education-row {
-  display: grid;
-  grid-template-columns: minmax(12rem, 0.9fr) minmax(0, 1.1fr);
-  gap: 1.5rem;
-}
-
-.education-row p {
-  margin: 0;
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-
-.education-row div p {
-  margin-top: 0.2rem;
-  color: var(--accent);
-  font-size: 0.7rem;
-  font-weight: 620;
 }
 
 footer {
@@ -639,11 +619,6 @@ footer p {
     clip: rect(0 0 0 0);
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-
-  .education-row {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
   }
 
   footer {

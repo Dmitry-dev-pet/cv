@@ -42,9 +42,3 @@ AI / Software Engineer building evidence-driven AI, data and research products. 
 ## Skills
 
 TypeScript, Python, Swift, Rust, Vue, React, Vite, SQLite, Postgres, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, temporal replay, model evaluation, OCR, speech-to-text, data provenance, PWA, Web Audio, scientific computing and visual QA.
-
-## Education
-
-**Candidate of Sciences in Chemistry (PhD equivalent)**
-
-Kazan National Research Technological University
