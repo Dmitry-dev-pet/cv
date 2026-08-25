@@ -1,14 +1,22 @@
 # Dmitry Glukhov
 
-**AI / Software Engineer**
+**AI / Software Engineer | Mathematical Reasoning Systems**
 
 Coimbra, Portugal | Europe/Lisbon | [dimkin3@gmail.com](mailto:dimkin3@gmail.com) | [GitHub](https://github.com/Dmitry-dev-pet) | [Telegram](https://t.me/dimkin3)
 
+**PhD**
+
 ## Profile
 
-AI / Software Engineer building evidence-driven AI, data and research products. I turn complex source material, model outputs and noisy datasets into inspectable systems with explicit provenance, durable state, evaluation, failure boundaries and useful interfaces. My recent work spans temporal evidence systems, LLM memory experiments, historical media reconstruction, executable generative graphics, OCR, speech-to-text and scientific pipelines.
+AI / Software Engineer building evidence-driven AI, mathematical reasoning and research products. I turn complex source material, model outputs and noisy datasets into inspectable systems with explicit provenance, durable state, evaluation and useful interfaces. My recent work spans Wolfram-verified problem solving, temporal evidence systems, LLM evaluation, historical media reconstruction and scientific pipelines.
 
 ## Selected Projects
+
+**Wolfram Agent - AI-assisted mathematical reasoning** | Local R&D
+
+- Built a local mathematics assistant that turns text and image problems into worked solutions with mandatory Wolfram verification, PDF reports and plots.
+- Applied Reduce, FullSimplify, Resolve / ForAll and FindInstance to equivalence checks, quantified constraints, integer feasibility and counterexample search.
+- Produced 46 worked mathematics reports and a safe execution layer with hard timeouts; computational checks and human-readable reasoning remain visibly distinct.
 
 **Reality Wiki - temporal evidence and model memory** | Private R&D
 
@@ -36,9 +44,7 @@ AI / Software Engineer building evidence-driven AI, data and research products. 
 ## Additional Public Work
 
 - [Feynman Reader](https://dmitry-dev-pet.github.io/feynman-reader/) - bilingual static reader for 3 volumes and 115 chapters, with 12,644 formulas, 1,038 figures, media manifests and validation tooling.
-- [AI Agent Case Studies](https://github.com/Dmitry-dev-pet/ai-agent-case-studies) - restartable Telegram-to-wiki LLM pipeline with state, retries, token visibility and operational diagnostics.
-- [Mermaid Compiler](https://github.com/Dmitry-dev-pet/mermaid-compiler) - AI-assisted diagram workspace with validation, repair loops and multi-provider routing.
 
 ## Skills
 
-TypeScript, Python, Swift, Rust, Vue, React, Vite, SQLite, Postgres, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, temporal replay, model evaluation, OCR, speech-to-text, data provenance, PWA, Web Audio, scientific computing and visual QA.
+Wolfram Language, Python, TypeScript, Swift, Rust, Vue, React, SQLite, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, symbolic verification, quantified constraints, counterexample search, temporal replay, model evaluation, OCR, speech-to-text and scientific computing.

@@ -5,14 +5,15 @@ const translations = {
     download: "Download",
     downloadPdf: "PDF résumé",
     downloadMd: "Markdown source",
-    role: "AI / Software Engineer — evidence-driven systems and interactive research products",
+    role: "AI / Software Engineer — mathematical reasoning and evidence-driven systems",
     heroStatement:
       "I turn complex sources, models and data into inspectable products with explicit provenance, validation and useful interfaces.",
     contactAction: "Start a conversation",
     contactHeading: "Contact",
     location: "Coimbra, Portugal · Europe/Lisbon",
     signalHeading: "At a glance",
-    signalTwo: "Temporal evidence · LLM evaluation · data pipelines",
+    signalDegree: "PhD",
+    signalTwo: "Wolfram verification · mathematical reasoning · LLM evaluation",
     signalThree: "Interactive web · PWA · local-first systems",
     signalFour: "Evidence and reproducibility over hype",
     approachHeading: "How I work",
@@ -22,17 +23,24 @@ const translations = {
     skillsHeading: "Core stack",
     summaryHeading: "Profile",
     summaryLead:
-      "AI / Software Engineer building evidence-driven AI, data and research products — from cutoff-safe knowledge systems to historical media and executable generative graphics.",
+      "AI / Software Engineer building evidence-driven AI, mathematical reasoning and research products — from Wolfram-verified problem solving to cutoff-safe knowledge systems.",
     summaryBody:
       "My strength is the whole system around the model or dataset: acquisition, provenance, state, evaluation, failure boundaries, interaction design and reproducible delivery.",
     principle: "The model is a component. The product is the complete, observable workflow.",
     projectsHeading: "Selected systems",
+    localMath: "Local mathematical R&D",
     privateResearch: "Private R&D · summarized",
     publicProduct: "Live product · public release",
     publicLab: "Live laboratory · public source",
     publicRepo: "Public repository",
     publicRelease: "Public reader release",
-    earlierWork: "Earlier public AI work",
+    wolframTitle: "Wolfram Agent — AI-assisted mathematical reasoning",
+    wolframOne:
+      "Built a local mathematics assistant that turns text and image problems into worked solutions with mandatory Wolfram verification, PDF reports and plots.",
+    wolframTwo:
+      "Applied Reduce, FullSimplify, Resolve / ForAll and FindInstance to equivalence checks, quantified constraints, integer feasibility and counterexample search.",
+    wolframThree:
+      "Produced 46 worked mathematics reports and a safe execution layer with hard timeouts; computational checks and human-readable reasoning remain visibly distinct.",
     realityTitle: "Reality Wiki — temporal evidence and model memory",
     realityOne:
       "Append-only epistemic ledger separates publication, availability, ingestion and event time; replay hashes make visible evidence reproducible.",
@@ -60,14 +68,10 @@ const translations = {
       "Includes permissions, command control, diagnostics, validation executables and local app bundling.",
     feynmanBody:
       "Built a bilingual static reader for three volumes and 115 chapters, with 12,644 formulas, 1,038 figures, media manifests, generated study materials, validation tooling and a responsive reading shell.",
-    earlierTitle: "LLM knowledge pipelines and developer tools",
-    earlierBody:
-      "A restartable Telegram-to-wiki knowledge pipeline with operational telemetry, plus an AI-assisted Mermaid workspace with validation, repair loops and multi-provider routing.",
     liveProduct: "Live product ↗",
     liveLab: "Live laboratory ↗",
     liveReader: "Live reader ↗",
     viewRelease: "Public release ↗",
-    viewCase: "Case study ↗",
     viewRepo: "View repository ↗",
     footer: "Open to applied AI engineering and research-driven product work.",
     documentTitle: "Dmitry Glukhov — AI / Software Engineer",
@@ -78,14 +82,15 @@ const translations = {
     download: "Скачать",
     downloadPdf: "Резюме в PDF",
     downloadMd: "Исходник Markdown",
-    role: "AI / Software Engineer — доказательные системы и интерактивные исследовательские продукты",
+    role: "AI / Software Engineer — математические рассуждения и доказательные системы",
     heroStatement:
       "Превращаю сложные источники, модели и данные в проверяемые продукты с явным provenance, валидацией и полезным интерфейсом.",
     contactAction: "Обсудить задачу",
     contactHeading: "Контакты",
     location: "Коимбра, Португалия · Europe/Lisbon",
     signalHeading: "Главное",
-    signalTwo: "Temporal evidence · LLM evaluation · data pipelines",
+    signalDegree: "PhD",
+    signalTwo: "Wolfram verification · математические рассуждения · LLM evaluation",
     signalThree: "Интерактивный web · PWA · local-first systems",
     signalFour: "Доказательства и воспроизводимость вместо хайпа",
     approachHeading: "Как я работаю",
@@ -95,17 +100,24 @@ const translations = {
     skillsHeading: "Основной стек",
     summaryHeading: "Профиль",
     summaryLead:
-      "AI / Software Engineer, создающий доказательные AI-, data- и research-продукты — от cutoff-safe систем знаний до исторической медиасреды и исполняемой генеративной графики.",
+      "AI / Software Engineer, создающий доказательные AI-, математические и research-продукты — от Wolfram-проверяемых решений до cutoff-safe систем знаний.",
     summaryBody:
       "Моя сильная сторона — вся система вокруг модели или датасета: получение данных, provenance, состояние, evaluation, отказобезопасные границы, interaction design и воспроизводимая поставка.",
     principle: "Модель — компонент. Продукт — полный наблюдаемый workflow.",
     projectsHeading: "Избранные системы",
+    localMath: "Локальный математический R&D",
     privateResearch: "Приватный R&D · описание",
     publicProduct: "Живой продукт · публичный релиз",
     publicLab: "Живая лаборатория · открытый код",
     publicRepo: "Публичный репозиторий",
     publicRelease: "Публичный reader-релиз",
-    earlierWork: "Предыдущие публичные AI-проекты",
+    wolframTitle: "Wolfram Agent — математические рассуждения с AI",
+    wolframOne:
+      "Построил локального математического ассистента, который превращает текстовые задачи и изображения в развёрнутые решения с обязательной Wolfram-проверкой, PDF-отчётами и графиками.",
+    wolframTwo:
+      "Применил Reduce, FullSimplify, Resolve / ForAll и FindInstance для проверки эквивалентности, кванторных ограничений, целочисленной выполнимости и поиска контрпримеров.",
+    wolframThree:
+      "Подготовил 46 математических отчётов и безопасный execution layer с жёсткими тайм-аутами; вычислительные проверки явно отделены от понятного человеку рассуждения.",
     realityTitle: "Reality Wiki — временные знания и память моделей",
     realityOne:
       "Append-only epistemic ledger разделяет время публикации, доступности, ingestion и события; хеши replay делают видимые доказательства воспроизводимыми.",
@@ -133,14 +145,10 @@ const translations = {
       "Включает permissions flow, управление командами, диагностику, validation executables и локальную сборку приложения.",
     feynmanBody:
       "Построил двуязычный статический reader для трёх томов и 115 глав: 12 644 формулы, 1 038 рисунков, media manifests, генерируемые учебные материалы, validation tools и адаптивная оболочка чтения.",
-    earlierTitle: "LLM knowledge pipelines и developer tools",
-    earlierBody:
-      "Перезапускаемый Telegram-to-wiki knowledge pipeline с operational telemetry и AI-workspace для Mermaid с валидацией, repair loops и multi-provider routing.",
     liveProduct: "Живой продукт ↗",
     liveLab: "Живая лаборатория ↗",
     liveReader: "Живой reader ↗",
     viewRelease: "Публичный релиз ↗",
-    viewCase: "Case study ↗",
     viewRepo: "Открыть репозиторий ↗",
     footer: "Открыт к прикладным AI-проектам и продуктовой работе с исследовательской составляющей.",
     documentTitle: "Дмитрий Глухов — AI / Software Engineer",
