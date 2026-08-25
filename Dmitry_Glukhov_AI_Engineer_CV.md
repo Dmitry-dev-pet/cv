@@ -4,6 +4,8 @@
 
 Coimbra, Portugal | Europe/Lisbon | [dimkin3@gmail.com](mailto:dimkin3@gmail.com) | [GitHub](https://github.com/Dmitry-dev-pet) | [Telegram](https://t.me/dimkin3)
 
+[ORCID: 0000-0002-8053-5763](https://orcid.org/0000-0002-8053-5763) | [Scopus Author ID: 6603336349](https://www.scopus.com/authid/detail.uri?authorId=6603336349)
+
 **PhD**
 
 ## Profile
