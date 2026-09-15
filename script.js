@@ -27,6 +27,16 @@ const translations = {
     summaryBody:
       "My strength is the whole system around the model or dataset: acquisition, provenance, state, evaluation, failure boundaries, interaction design and reproducible delivery.",
     principle: "The model is a component. The product is the complete, observable workflow.",
+    experienceHeading: "Experience",
+    experienceMeta: "Remote · private and public work",
+    experienceTitle: "Independent AI / Data Automation Engineer",
+    experienceRole: "2025-present · LLM systems · data pipelines · evaluation · automation",
+    experienceOne:
+      "Develop local AI/data tools and research prototypes across LLM systems, Telegram and document data, SQLite-first pipelines, retrieval/RAG and reproducible delivery.",
+    experienceTwo:
+      "Designed SQL-first knowledge pipelines with staged LLM extraction, semantic wiki layers, graph serving, runtime context and Control Center observability.",
+    experienceThree:
+      "Built document/OCR/reporting automation, temporal evidence ledgers, as-of replay, model-memory experiments and AI developer workflow automation.",
     projectsHeading: "Selected systems",
     localMath: "Local mathematical R&D",
     privateResearch: "Private R&D · summarized",
@@ -104,6 +114,16 @@ const translations = {
     summaryBody:
       "Моя сильная сторона — вся система вокруг модели или датасета: получение данных, provenance, состояние, evaluation, отказобезопасные границы, interaction design и воспроизводимая поставка.",
     principle: "Модель — компонент. Продукт — полный наблюдаемый workflow.",
+    experienceHeading: "Опыт",
+    experienceMeta: "Remote · приватные и публичные работы",
+    experienceTitle: "Independent AI / Data Automation Engineer",
+    experienceRole: "2025-настоящее время · LLM-системы · data pipelines · evaluation · automation",
+    experienceOne:
+      "Разрабатываю локальные AI/data-инструменты и исследовательские прототипы вокруг LLM, Telegram и документных данных, SQLite-first пайплайнов, retrieval/RAG и воспроизводимой поставки.",
+    experienceTwo:
+      "Проектировал SQL-first knowledge pipelines со staged LLM extraction, semantic wiki layers, graph serving, runtime context и Control Center observability.",
+    experienceThree:
+      "Строил document/OCR/reporting automation, temporal evidence ledgers, as-of replay, model-memory experiments и AI developer workflow automation.",
     projectsHeading: "Избранные системы",
     localMath: "Локальный математический R&D",
     privateResearch: "Приватный R&D · описание",

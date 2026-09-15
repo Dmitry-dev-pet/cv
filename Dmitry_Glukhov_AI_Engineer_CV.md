@@ -12,6 +12,16 @@ Coimbra, Portugal | Europe/Lisbon | [dimkin3@gmail.com](mailto:dimkin3@gmail.com
 
 AI / Software Engineer building evidence-driven AI, mathematical reasoning and research products. I turn complex source material, model outputs and noisy datasets into inspectable systems with explicit provenance, durable state, evaluation and useful interfaces. My recent work spans Wolfram-verified problem solving, temporal evidence systems, LLM evaluation, historical media reconstruction and scientific pipelines.
 
+## Experience
+
+**Independent AI / Data Automation Engineer** | Remote / NDA projects | 2025-present
+
+- Develop local AI/data tools and research prototypes across LLM systems, Telegram and document data, SQLite-first pipelines, retrieval/RAG, evaluation, workflow automation and reproducible delivery.
+- Designed SQL-first knowledge pipelines: ingestion, normalization, staged LLM extraction, semantic wiki layers, graph serving, runtime context and Control Center observability.
+- Built document, OCR and reporting automation: Markdown/TXT/DOCX/PDF/PPTX generation, page-by-page QA, manifests and review-ready delivery packages.
+- Implemented evaluation and research systems: temporal evidence ledgers, as-of replay, immutable forecast records, baseline comparison, model-memory experiments and reproducible scoring.
+- Automated AI/developer workflows around GitHub PR feedback loops, self-hosted macOS runners and provider/backend isolation for Codex, Gemini and OpenAI-compatible systems.
+
 ## Selected Projects
 
 **Wolfram Agent - AI-assisted mathematical reasoning** | Local R&D

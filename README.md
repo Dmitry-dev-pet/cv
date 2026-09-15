@@ -10,6 +10,19 @@ Coimbra, Portugal / [dimkin3@gmail.com](mailto:dimkin3@gmail.com) / Telegram: [@
 
 I build evidence-driven AI, data and research products. My recent work combines temporal data provenance, LLM evaluation, interactive scientific interfaces, historical media reconstruction, OCR/speech pipelines and local-first tools.
 
+## Experience
+
+### Independent AI / Data Automation Engineer
+
+2025-present, remote / project work under NDA.
+
+I develop local AI/data tools and research prototypes across LLM systems, Telegram and document data, SQLite-first pipelines, retrieval/RAG, evaluation, workflow automation and reproducible delivery. Some work is private; client names, source data and closed implementation details are not disclosed under NDA.
+
+- designed SQL-first knowledge pipelines: ingestion, normalization, staged LLM extraction, semantic wiki layers, graph serving, runtime context and Control Center observability;
+- built document, OCR and reporting automation: Markdown/TXT/DOCX/PDF/PPTX generation, page-by-page QA, manifests and review-ready delivery packages;
+- implemented evaluation and research systems: temporal evidence ledgers, as-of replay, immutable forecast records, baseline comparison, model-memory experiments and reproducible scoring;
+- automated AI/developer workflows around GitHub PR feedback loops, self-hosted macOS runners, compact runner-result comments and provider/backend isolation for Codex, Gemini and OpenAI-compatible systems.
+
 ## Current Featured Work
 
 ### Reality Wiki
