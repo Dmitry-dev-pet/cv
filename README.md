@@ -23,6 +23,17 @@ I develop local AI/data tools and research prototypes across LLM systems, Telegr
 - implemented evaluation and research systems: temporal evidence ledgers, as-of replay, immutable forecast records, baseline comparison, model-memory experiments and reproducible scoring;
 - automated AI/developer workflows around GitHub PR feedback loops, self-hosted macOS runners, compact runner-result comments and provider/backend isolation for Codex, Gemini and OpenAI-compatible systems.
 
+## Scientific and Computational Research
+
+### Computational Scientist and Researcher
+
+Kazan National Research Technological University.
+
+- personally performed all computational work reported in the highlighted publications using Python, Fortran, MATLAB and domain-specific quantum chemistry and molecular simulation software;
+- built and ran DFT, lattice and kinetic Monte Carlo, and molecular dynamics workflows, processed outputs and tested model predictions against Raman, STM and electrochemical experiments;
+- first-authored an [IEEE study of Kotlin and Java implementation performance](https://doi.org/10.1109/FarEastCon50210.2020.9271621), including test design, measurements and analysis;
+- [Scopus author record](https://www.scopus.com/authid/detail.uri?authorId=6603336349): 22 publications, 391 citations and h-index 13, verified in September 2026.
+
 ## Current Featured Work
 
 ### Reality Wiki
@@ -74,7 +85,7 @@ Bilingual static reader for three volumes and 115 chapters, with 12,644 formulas
 
 ## Stack
 
-TypeScript, Python, Swift, Rust, Vue, React, Vite, SQLite, Postgres, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, OCR, speech-to-text, temporal replay, evaluation and reproducible data workflows.
+TypeScript, Python, Fortran, MATLAB, Swift, Rust, Vue, React, Vite, SQLite, Postgres, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, OCR, speech-to-text, temporal replay, evaluation and reproducible data workflows.
 
 ## Privacy And Attribution
 

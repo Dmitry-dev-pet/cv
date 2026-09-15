@@ -37,6 +37,16 @@ const translations = {
       "Designed SQL-first knowledge pipelines with staged LLM extraction, semantic wiki layers, graph serving, runtime context and Control Center observability.",
     experienceThree:
       "Built document/OCR/reporting automation, temporal evidence ledgers, as-of replay, model-memory experiments and AI developer workflow automation.",
+    researchHeading: "Scientific research",
+    researchMeta: "Scopus · 22 publications · 391 citations · h-index 13",
+    researchTitle: "Computational Scientist and Researcher",
+    researchRole: "Kazan National Research Technological University · computational chemistry and software performance",
+    researchOne:
+      "Personally performed all computational work reported in the highlighted publications using Python, Fortran, MATLAB and domain-specific quantum chemistry and molecular simulation software.",
+    researchTwo:
+      "Built and ran DFT, lattice and kinetic Monte Carlo, and molecular dynamics workflows; processed outputs and tested model predictions against Raman, STM and electrochemical experiments.",
+    researchThree:
+      "First-authored an IEEE study benchmarking Kotlin and Java implementations; designed the tests, ran the measurements and analyzed the results.",
     projectsHeading: "Selected systems",
     localMath: "Local mathematical R&D",
     privateResearch: "Private R&D · summarized",
@@ -124,6 +134,16 @@ const translations = {
       "Проектировал SQL-first knowledge pipelines со staged LLM extraction, semantic wiki layers, graph serving, runtime context и Control Center observability.",
     experienceThree:
       "Строил document/OCR/reporting automation, temporal evidence ledgers, as-of replay, model-memory experiments и AI developer workflow automation.",
+    researchHeading: "Научные исследования",
+    researchMeta: "Scopus · 22 публикации · 391 цитирование · h-index 13",
+    researchTitle: "Вычислительный исследователь",
+    researchRole: "Казанский национальный исследовательский технологический университет · вычислительная химия и производительность ПО",
+    researchOne:
+      "Лично выполнил всю вычислительную часть представленных публикаций с использованием Python, Fortran, MATLAB и специализированных программ квантовой химии и молекулярного моделирования.",
+    researchTwo:
+      "Выполнял расчёты методами DFT, lattice и kinetic Monte Carlo и molecular dynamics; обрабатывал результаты и проверял предсказания моделей по данным Raman, STM и электрохимических экспериментов.",
+    researchThree:
+      "Первый автор IEEE-работы о производительности реализаций на Kotlin и Java: разработал тесты, провёл измерения и проанализировал результаты.",
     projectsHeading: "Избранные системы",
     localMath: "Локальный математический R&D",
     privateResearch: "Приватный R&D · описание",

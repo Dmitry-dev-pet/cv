@@ -22,6 +22,15 @@ AI / Software Engineer building evidence-driven AI, mathematical reasoning and r
 - Implemented evaluation and research systems: temporal evidence ledgers, as-of replay, immutable forecast records, baseline comparison, model-memory experiments and reproducible scoring.
 - Automated AI/developer workflows around GitHub PR feedback loops, self-hosted macOS runners and provider/backend isolation for Codex, Gemini and OpenAI-compatible systems.
 
+## Scientific and Computational Research
+
+**Computational Scientist and Researcher** | Kazan National Research Technological University
+
+- Personally performed all computational work reported in the highlighted publications, using Python, Fortran, MATLAB and domain-specific quantum chemistry and molecular simulation software.
+- Built and ran DFT, lattice and kinetic Monte Carlo, and molecular dynamics workflows; processed outputs and tested model predictions against Raman, STM and electrochemical experiments.
+- First-authored an [IEEE study of Kotlin and Java implementation performance](https://doi.org/10.1109/FarEastCon50210.2020.9271621): designed the tests, ran the measurements and analyzed the results.
+- [Scopus author record](https://www.scopus.com/authid/detail.uri?authorId=6603336349): 22 publications, 391 citations and h-index 13 (verified September 2026).
+
 ## Selected Projects
 
 **Wolfram Agent - AI-assisted mathematical reasoning** | Local R&D
@@ -59,4 +68,4 @@ AI / Software Engineer building evidence-driven AI, mathematical reasoning and r
 
 ## Skills
 
-Wolfram Language, Python, TypeScript, Swift, Rust, Vue, React, SQLite, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, symbolic verification, quantified constraints, counterexample search, temporal replay, model evaluation, OCR, speech-to-text and scientific computing.
+Wolfram Language, Python, Fortran, MATLAB, TypeScript, Swift, Rust, Vue, React, SQLite, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, symbolic verification, quantified constraints, counterexample search, temporal replay, model evaluation, OCR, speech-to-text and scientific computing.

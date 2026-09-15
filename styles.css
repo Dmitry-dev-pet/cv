@@ -621,6 +621,19 @@ footer p {
     white-space: nowrap;
   }
 
+  .research-project {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.7rem;
+  }
+
+  .research-project .project-meta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 0.8rem;
+    font-size: 0.68rem;
+  }
+
   footer {
     flex-direction: column;
     margin-inline: 1.35rem;
