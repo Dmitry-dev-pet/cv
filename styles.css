@@ -29,6 +29,7 @@ body {
   font-size: 0.92rem;
   line-height: 1.56;
   text-rendering: optimizeLegibility;
+  letter-spacing: 0;
 }
 
 a {
@@ -119,7 +120,7 @@ summary {
   color: var(--faint);
   font-size: 0.67rem;
   font-weight: 650;
-  letter-spacing: 0.105em;
+  letter-spacing: 0;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -151,7 +152,7 @@ summary {
   background: transparent;
   font-size: 0.66rem;
   font-weight: 750;
-  letter-spacing: 0.045em;
+  letter-spacing: 0;
   cursor: pointer;
 }
 
@@ -198,14 +199,16 @@ summary {
   display: grid;
   width: max-content;
   min-width: 10rem;
+  max-width: min(22rem, calc(100vw - 2.7rem));
   padding: 0.35rem;
   border: 1px solid var(--line);
-  border-radius: 0.55rem;
+  border-radius: 0.5rem;
   background: #fff;
   box-shadow: 0 0.8rem 2.2rem rgba(20, 24, 21, 0.1);
 }
 
 .download-options a {
+  overflow-wrap: anywhere;
   padding: 0.48rem 0.62rem;
   border-radius: 0.32rem;
   color: var(--ink);
@@ -221,9 +224,10 @@ summary {
 h1 {
   margin: 0;
   color: #111315;
-  font-size: clamp(2.15rem, 5vw, 2.72rem);
+  font-size: 2.5rem;
   font-weight: 680;
-  letter-spacing: -0.045em;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
   line-height: 1.02;
 }
 
@@ -272,7 +276,7 @@ h1 {
   margin: 0;
   font-size: 0.69rem;
   font-weight: 780;
-  letter-spacing: 0.13em;
+  letter-spacing: 0;
   line-height: 1.3;
   text-transform: uppercase;
 }
@@ -292,7 +296,7 @@ h1 {
   color: var(--accent);
   font-size: 0.65rem;
   font-weight: 760;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .section-heading h2 {
@@ -420,7 +424,7 @@ h1 {
   color: var(--faint);
   font-size: 0.62rem;
   font-weight: 620;
-  letter-spacing: 0.025em;
+  letter-spacing: 0;
   line-height: 1.35;
   text-transform: uppercase;
 }
@@ -429,7 +433,7 @@ h1 {
   color: var(--accent);
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0;
 }
 
 .project-copy h3 {
@@ -437,7 +441,7 @@ h1 {
   color: var(--ink);
   font-size: 0.96rem;
   font-weight: 720;
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
   line-height: 1.35;
 }
 
@@ -474,6 +478,24 @@ h1 {
   flex-wrap: wrap;
   gap: 0.45rem 0.9rem;
   margin-top: 0.65rem;
+}
+
+.projects-intro,
+.more-projects {
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.projects-intro {
+  margin: 0 0 1.2rem;
+}
+
+.more-projects {
+  margin: 1.6rem 0 0;
+}
+
+.project-meta {
+  overflow-wrap: anywhere;
 }
 
 .project-link {
@@ -575,7 +597,7 @@ footer p {
   }
 
   h1 {
-    font-size: clamp(2.1rem, 10vw, 2.65rem);
+    font-size: 2.15rem;
   }
 
   .role {

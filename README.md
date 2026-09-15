@@ -1,92 +1,69 @@
-# Dmitry Glukhov, AI / Software Engineer
+# Дмитрий Глухов, AI / Data Engineer
 
-Coimbra, Portugal / [dimkin3@gmail.com](mailto:dimkin3@gmail.com) / Telegram: [@dimkin3](https://t.me/dimkin3)
+Коимбра, Португалия | [dimkin3@gmail.com](mailto:dimkin3@gmail.com) | +351 912 793 373 | [Telegram: @dimkin3](https://t.me/dimkin3)
 
-## Live CV
+[Резюме на сайте](https://dmitry-dev-pet.github.io/cv/) · [English website](https://dmitry-dev-pet.github.io/cv/?lang=en)
 
-- [English](https://dmitry-dev-pet.github.io/cv/?lang=en)
-- [Russian](https://dmitry-dev-pet.github.io/cv/?lang=ru)
-- [PDF](./Dmitry_Glukhov_AI_Engineer_CV.pdf)
+- **AI Data Engineer:** [PDF](./Dmitry_Glukhov_AI_Data_Engineer_RU.pdf) · [Markdown](./Dmitry_Glukhov_AI_Data_Engineer_RU.md).
+- **AI Solutions Architect:** [PDF](./Dmitry_Glukhov_AI_Solutions_Architect_RU.pdf) · [Markdown](./Dmitry_Glukhov_AI_Solutions_Architect_RU.md).
 
-I build evidence-driven AI, data and research products. My recent work combines temporal data provenance, LLM evaluation, interactive scientific interfaces, historical media reconstruction, OCR/speech pipelines and local-first tools.
+Разрабатываю пайплайны обработки данных и прототипы LLM-систем: загрузку источников, SQL-хранилища, этапы обработки и проверки результатов. Научный опыт связан с численным моделированием, программированием и анализом вычислительных экспериментов. Интересуют роли AI Data Engineer и AI Solutions Architect с непосредственным участием в разработке.
 
-## Experience
+## Опыт работы
 
-### Independent AI / Data Automation Engineer
+### Старший научный сотрудник | 2003-2024
 
-2025-present, remote / project work under NDA.
+Казанский национальный исследовательский технологический университет.
 
-I develop local AI/data tools and research prototypes across LLM systems, Telegram and document data, SQLite-first pipelines, retrieval/RAG, evaluation, workflow automation and reproducible delivery. Some work is private; client names, source data and closed implementation details are not disclosed under NDA.
+- Лично выполнял вычислительную часть научных публикаций: код на Python, Fortran и MATLAB, расчёты в специализированных пакетах, обработка и анализ результатов.
+- Проводил расчёты методами DFT, Монте-Карло и молекулярной динамики; сопоставлял результаты с экспериментом, проверял чувствительность к параметрам и ограничения моделей.
+- Написал в MATLAB модель самоорганизации цистеина на золоте: задал состояния и вероятностные правила, проводил расчёты до 8 млн шагов и проверял влияние размера решётки. [Nanoscale, 2019](https://doi.org/10.1039/C9NR02477H).
 
-- designed SQL-first knowledge pipelines: ingestion, normalization, staged LLM extraction, semantic wiki layers, graph serving, runtime context and Control Center observability;
-- built document, OCR and reporting automation: Markdown/TXT/DOCX/PDF/PPTX generation, page-by-page QA, manifests and review-ready delivery packages;
-- implemented evaluation and research systems: temporal evidence ledgers, as-of replay, immutable forecast records, baseline comparison, model-memory experiments and reproducible scoring;
-- automated AI/developer workflows around GitHub PR feedback loops, self-hosted macOS runners, compact runner-result comments and provider/backend isolation for Codex, Gemini and OpenAI-compatible systems.
+[ORCID](https://orcid.org/0000-0002-8053-5763) · [Scopus](https://www.scopus.com/authid/detail.uri?authorId=6603336349)
 
-## Scientific and Computational Research
+## Независимые инженерные проекты
 
-### Computational Scientist and Researcher
+Собственные разработки и исследовательские прототипы.
 
-Kazan National Research Technological University.
+### Chat Deep Wiki
 
-- personally performed all computational work reported in the highlighted publications using Python, Fortran, MATLAB and domain-specific quantum chemistry and molecular simulation software;
-- built and ran DFT, lattice and kinetic Monte Carlo, and molecular dynamics workflows, processed outputs and tested model predictions against Raman, STM and electrochemical experiments;
-- first-authored an [IEEE study of Kotlin and Java implementation performance](https://doi.org/10.1109/FarEastCon50210.2020.9271621), including test design, measurements and analysis;
-- [Scopus author record](https://www.scopus.com/authid/detail.uri?authorId=6603336349): 22 publications, 391 citations and h-index 13, verified in September 2026.
+Python, SQLite, LLM API. [Публичное описание проекта](https://github.com/Dmitry-dev-pet/ai-agent-case-studies).
 
-## Current Featured Work
+- Реализовал загрузку и обновление сообщений: нормализацию, параметризованные SQL UPSERT, учёт новых и изменённых записей, пакетную запись в SQLite.
+- Разделил исходные сообщения, семантическое представление знаний и графовый слой приложения. Связал поэтапную LLM-обработку и подготовку контекста.
+- Добавил проверки совместимости кэша с моделью и схемой результата, таймауты и повторные API-вызовы, статусы этапов и тесты согласованной остановки пайплайна.
 
 ### Reality Wiki
 
-Private research prototype for preserving and replaying what was knowable at a specific moment.
+TypeScript, SQL, SQLite, DuckDB, Parquet. Исследовательский прототип.
 
-- append-only epistemic ledger with publication, availability, ingestion and event time;
-- historical and operational as-of replay with SHA-256 evidence hashes;
-- official CBR and Rosstat source mirroring into SQLite, DuckDB and Parquet;
-- model-memory experiments with locked arms, Brier scoring and forward-only promotion gates;
-- browser research UI and append-only claim-level review.
+- Разделил журнал исходных событий и аналитические снимки. Задал контракты данных, привязку к источникам и воспроизводимые идентификаторы снимков.
+- Развёл исторический и операционный режимы выборки по времени публикации и загрузки данных.
+- Написал тесты, которые исключают будущие сведения из исторической выборки, отклоняют записи без источника и проверяют стабильность повторной обработки.
 
-### [Time Receiver](https://dmitry-dev-pet.github.io/time-receiver/)
+### Time Receiver
 
-Static-first historical radio and television PWA for Moscow, 1940-1990.
+TypeScript, SQLite, FTS5, Vue. [Демо](https://dmitry-dev-pet.github.io/time-receiver/) · [Публичный релиз](https://github.com/Dmitry-dev-pet/time-receiver).
 
-- 18,628 days, 4.09M radio events and 395K TV events;
-- 51 on-demand yearly data packs and an offline-capable shell;
-- explicit `EXACT`, `RECONSTRUCTED` and `EQUIVALENT` fidelity labels;
-- archival ingestion, matching and editorial-review pipelines;
-- Vue, TypeScript, Web Audio, PWA, SQLite and Vitest.
+- Объединил разнородные медиакаталоги в общую модель с учётом источников, точности дат и прав.
+- Реализовал транзакционный импорт, полнотекстовый индекс и сводный манифест данных для веб-приложения; добавил проверки согласованности статистики.
+- Отделил исходные исторические сведения от реконструированных событий.
 
-Public release repository: [time-receiver](https://github.com/Dmitry-dev-pet/time-receiver)
+[Другие проекты и технические описания](./projects.md)
 
-### [Form / Field](https://dmitry-dev-pet.github.io/form-field-lab/)
+## Инструменты
 
-Vue/Vite/p5.js laboratory for executable generative graphics.
+- **Разработка:** Python, TypeScript, SQL, REST API, JSON.
+- **AI-системы:** LLM API, embeddings, кэш-контракты, автоматические тесты.
+- **Данные и моделирование:** SQLite, DuckDB, Parquet, MATLAB, Fortran, Монте-Карло.
 
-- research interface around 34 clearly attributed sketches by @yuruyurau;
-- code snapshot of 845 community works by 26 authors;
-- visible RAW code is the actual rendering source;
-- bounded generative genomes, manual 3D projection, topology tools and stateful entities;
-- 16 Node test modules and automated GitHub Pages deployment.
+## Образование
 
-Public source: [form-field-lab](https://github.com/Dmitry-dev-pet/form-field-lab)
+- Казанский национальный исследовательский технологический университет.
+- Кандидат химических наук.
 
-### [Native Audio Translator](https://github.com/Dmitry-dev-pet/native-audio-translator)
+## Примечания
 
-Native macOS prototype for live audio translation and OCR subtitle overlays, with noisy partial-result stabilization, runtime permissions and local diagnostics.
+Для проектов с закрытым исходным кодом приведены технические описания без исходных данных и приватных деталей. Материалы других авторов сохраняют исходную атрибуцию.
 
-### [Feynman Reader](https://dmitry-dev-pet.github.io/feynman-reader/)
-
-Bilingual static reader for three volumes and 115 chapters, with 12,644 formulas, 1,038 figures, media manifests, generated study materials and validation tooling.
-
-## Earlier Public AI Work
-
-- [ai-agent-case-studies](https://github.com/Dmitry-dev-pet/ai-agent-case-studies) - restartable Telegram-to-wiki LLM pipeline with state, retries, token visibility and operational diagnostics.
-- [mermaid-compiler](https://github.com/Dmitry-dev-pet/mermaid-compiler) - AI-assisted Mermaid workspace with validation, repair loops and multi-provider routing.
-
-## Stack
-
-TypeScript, Python, Fortran, MATLAB, Swift, Rust, Vue, React, Vite, SQLite, Postgres, DuckDB, Parquet, Docker, GitHub Actions, LLM pipelines, OCR, speech-to-text, temporal replay, evaluation and reproducible data workflows.
-
-## Privacy And Attribution
-
-Private projects are summarized without exposing private data, credentials or closed-source implementation details. Third-party source material and artworks remain attributed to their original authors; the portfolio describes the engineering and research interfaces built around them.
+[Профиль GitHub](https://github.com/Dmitry-dev-pet)
