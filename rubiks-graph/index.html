@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кубик Рубика — 3D canvas и круговой граф</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; min-height: 100%;
+    background: #f3eadc; color: #2c2a26;
+    font-family: "Palatino Linotype", Palatino, "Iowan Old Style", Georgia, serif;
+  }
+  header {
+    padding: 16px 22px 6px;
+    display: flex; justify-content: space-between; gap: 12px;
+    align-items: baseline; flex-wrap: wrap;
+  }
+  h1 { font-size: 20px; font-weight: 600; margin: 0; }
+  header p { margin: 0; color: #7d7468; font-size: 14px; }
+  .viz {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    width: calc(100% - 28px); margin: 8px 14px;
+    height: min(72vh, 720px);
+  }
+  .panelbox {
+    position: relative; background: #faf6ee; border-radius: 9px;
+    overflow: hidden; min-height: 420px;
+  }
+  canvas { width: 100%; height: 100%; display: block; }
+  .label {
+    position: absolute; left: 12px; top: 10px; z-index: 5;
+    font: 13px/1.2 ui-sans-serif, system-ui, sans-serif;
+    color: #786f63; background: rgba(250,246,238,.76);
+    padding: 4px 8px; border-radius: 999px;
+    user-select: none;
+  }
+  .panel { padding: 8px 18px 22px; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; align-items:center; }
+  button {
+    font: 13px/1 ui-sans-serif,system-ui,sans-serif;
+    border:1px solid #d9d0c2; background:#fffaf2;
+    border-radius:999px; padding:8px 12px; cursor:pointer; color:#2c2a26;
+  }
+  button:hover { background:#efe6d6; }
+  button.primary { background:#2c2a26; color:#f7f1e6; border-color:#2c2a26; }
+  button:disabled { opacity:.45; cursor:default; }
+  .hint { color:#7d7468; font:13px/1.35 ui-sans-serif,system-ui,sans-serif; }
+  .speed { display:flex; gap:7px; align-items:center; color:#6f675d; font:13px ui-sans-serif,system-ui,sans-serif; }
+  input[type=range] { width:160px; }
+  kbd { font:12px/1 ui-monospace,Menlo,monospace; background:#e8dfd0; padding:2px 6px; border-radius:5px; }
+  .solver-box {
+    margin-top: 12px; padding: 11px 12px;
+    border: 1px solid #ddd3c5; border-radius: 10px;
+    background: rgba(255,250,242,.72);
+    font: 13px/1.35 ui-sans-serif,system-ui,sans-serif;
+  }
+  .stage-strip { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:9px; }
+  .stage-chip {
+    display:flex; align-items:center; gap:5px;
+    border:1px solid #d8cfc2; border-radius:999px;
+    padding:5px 8px; background:#fbf5ec; color:#746b60;
+    transition:.15s ease;
+  }
+  .stage-chip .n {
+    width:18px; height:18px; border-radius:50%; display:inline-grid; place-items:center;
+    background:#e9dfd1; font-size:11px; font-weight:700;
+  }
+  .stage-chip.active { border-color:#8e7655; color:#352e26; background:#f0e3cf; }
+  .stage-chip.active .n { background:#2c2a26; color:#f7f1e6; }
+  .stage-chip.done { opacity:.58; }
+  .stage-chip.done .n::after { content:"✓"; }
+  .stage-chip.done .n { font-size:0; }
+  .stage-chip.done .n::after { font-size:11px; }
+  #solverStatus { font-weight:600; margin-bottom:4px; }
+  #solverMoves { color:#776f64; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-word; }
+</style>
+</head>
+<body>
+<header>
+  <h1>3D кубик: сборка по правилам и круговой граф</h1>
+  <p>Слева — rigid-body 3D, справа — круговой граф. «Собрать» теперь решает текущее состояние по семи этапам, а не откатывает историю.</p>
+</header>
+<div class="viz">
+  <div class="panelbox">
+    <div class="label">3D cubies — можно вращать мышкой</div>
+    <canvas id="cubeCanvas"></canvas>
+  </div>
+  <div class="panelbox">
+    <div class="label">Круговой граф</div>
+    <canvas id="graphCanvas"></canvas>
+  </div>
+</div>
+<div class="panel">
+  <div class="row" id="moves"></div>
+  <div class="row">
+    <button class="primary" id="scramble">Перемешать</button>
+    <button id="nextStage">Следующий этап</button>
+    <button id="solve">Собрать по этапам</button>
+    <button id="reset">Сбросить сразу</button>
+    <span class="speed">Скорость
+      <input id="speed" type="range" min="0.12" max="1.5" value="0.35" step="0.01">
+      <span id="speedVal">0.35×</span>
+    </span>
+  </div>
+  <div class="row">
+    <span class="hint">Клавиши <kbd>U R F D L B</kbd>, Shift — обратный ход. Решатель использует текущее состояние кубика и проходит крест → первый слой → средний слой → последний слой.</span>
+  </div>
+  <div class="solver-box">
+    <div class="stage-strip" id="stageStrip"></div>
+    <div id="solverStatus">Готово. Перемешайте кубик и запустите сборку.</div>
+    <div id="solverMoves"></div>
+  </div>
+</div>
+
+<script>
+const COLORS = { y:"#f2b53c", g:"#2f8b57", o:"#e87a2b", r:"#d83b32", w:"#f5f3ec", b:"#245ca8" };
+const CUBE_COL = { U:COLORS.g, D:COLORS.b, F:COLORS.r, B:COLORS.o, R:COLORS.w, L:COLORS.y };
+const FACES = {
+  U:{axis:1,dir: 1}, D:{axis:1,dir:-1},
+  R:{axis:0,dir: 1}, L:{axis:0,dir:-1},
+  F:{axis:2,dir: 1}, B:{axis:2,dir:-1}
+};
+
+function rot90(v,axis,sgn) {
+  const [x,y,z]=v;
+  if(axis===0) return [x, sgn<0?z:-z, sgn<0?-y:y];
+  if(axis===1) return [sgn<0?-z:z, y, sgn<0?x:-x];
+  return [sgn<0?y:-y, sgn<0?-x:x, z];
+}
+function rotDiscrete(v,axis,turns) {
+  let r=v.slice(), sg=turns>0?1:-1;
+  for(let i=0;i<Math.abs(turns);i++) r=rot90(r,axis,sg);
+  return r;
+}
+function rotAxis(v,axis,a) {
+  const c=Math.cos(a),s=Math.sin(a),[x,y,z]=v;
+  if(axis===0) return [x, y*c-z*s, y*s+z*c];
+  if(axis===1) return [x*c+z*s, y, -x*s+z*c];
+  return [x*c-y*s, x*s+y*c, z];
+}
+function timelineEase(t) {
+  const a=.333,d=.667;
+  const vmax=1/(1-(a+d)/2);
+  if(t<a) return .5*vmax/a*t*t;
+  if(t<=1-d) return vmax*(.5*a+(t-a));
+  const u=t-(1-d);
+  return vmax*(.5*a+(1-a-d)+u-u*u/(2*d));
+}
+function normAngle(a) {
+  while(a<=-Math.PI) a+=Math.PI*2;
+  while(a>Math.PI) a-=Math.PI*2;
+  return a;
+}
+
+// ---------- right graph geometry ----------
+const REF_W=440, REF_H=420;
+const FAMILY = { Top:{c:[220,160]}, Left:{c:[160,260]}, Right:{c:[280,260]} };
+const RADIUS = { Inner:100, Middle:130, Outer:160 };
+function faceSlots(prefix){ return {NW:prefix+"NW",N:prefix+"NN",NE:prefix+"NE",W:prefix+"WW",C:prefix+"CC",E:prefix+"EE",SW:prefix+"SW",S:prefix+"SS",SE:prefix+"SE"}; }
+const FS={}; for(const f of ["y","g","o","r","w","b"]) FS[f]=faceSlots(f);
+const seq=(f,names)=>names.map(n=>FS[f][n]);
+const rev=a=>a.slice().reverse();
+function corner(f,k){ const d={NW:["W","NW","N"],NE:["N","NE","E"],SE:["E","SE","S"],SW:["S","SW","W"]}; return seq(f,d[k]); }
+function slice(f,k){ const d={Top:["NW","N","NE"],Middle:["W","C","E"],Bottom:["SW","S","SE"],Left:["NW","W","SW"],Center:["N","C","S"],Right:["NE","E","SE"],DiagF:["NE","C","SW"],DiagB:["NW","C","SE"]}; return seq(f,d[k]); }
+const RINGS = {
+  TopInner:   slice("o","Left").concat(rev(slice("w","Top")),rev(slice("r","Top")),rev(slice("y","Right"))),
+  TopMiddle:  slice("o","Center").concat(rev(slice("w","Middle")),rev(slice("r","Middle")),rev(slice("y","Center"))),
+  TopOuter:   slice("o","Right").concat(rev(slice("w","Bottom")),rev(slice("r","Bottom")),rev(slice("y","Left"))),
+  LeftInner:  slice("y","Bottom").concat(rev(corner("g","SW")),slice("w","Left"),rev(corner("b","NW"))),
+  LeftMiddle: slice("y","Middle").concat(slice("g","DiagB"),slice("w","Center"),slice("b","DiagF")),
+  LeftOuter:  slice("y","Top").concat(corner("g","NE"),slice("w","Right"),corner("b","SE")),
+  RightInner: rev(corner("b","NE")).concat(rev(slice("r","Right")),rev(corner("g","SE")),slice("o","Bottom")),
+  RightMiddle:rev(slice("b","DiagB")).concat(rev(slice("r","Center")),rev(slice("g","DiagF")),slice("o","Middle")),
+  RightOuter: corner("b","SW").concat(rev(slice("r","Left")),corner("g","NW"),slice("o","Top"))
+};
+const RING_META = {
+  TopInner:["Top","Inner"], TopMiddle:["Top","Middle"], TopOuter:["Top","Outer"],
+  LeftInner:["Left","Inner"], LeftMiddle:["Left","Middle"], LeftOuter:["Left","Outer"],
+  RightInner:["Right","Inner"], RightMiddle:["Right","Middle"], RightOuter:["Right","Outer"]
+};
+const MOVE_META = {
+  U:{ ring:"TopInner", face:"g" }, D:{ ring:"TopOuter", face:"b" },
+  F:{ ring:"LeftInner", face:"r" }, B:{ ring:"LeftOuter", face:"o" },
+  R:{ ring:"RightInner", face:"w" }, L:{ ring:"RightOuter", face:"y" }
+};
+const MEMBERSHIP = new Map();
+for(const [ringName,items] of Object.entries(RINGS)) {
+  const [family,kind]=RING_META[ringName];
+  for(const id of items) {
+    if(!MEMBERSHIP.has(id)) MEMBERSHIP.set(id,[]);
+    MEMBERSHIP.get(id).push({family,kind,r:RADIUS[kind]});
+  }
+}
+const FACE_TARGET = { y:[90,150], g:[220,145], o:[350,150], r:[145,265], w:[290,265], b:[220,370] };
+function circleIntersections(c0,r0,c1,r1) {
+  const dx=c1[0]-c0[0], dy=c1[1]-c0[1], d=Math.hypot(dx,dy);
+  if(!d || d>r0+r1 || d<Math.abs(r0-r1)) return [];
+  const a=(r0*r0-r1*r1+d*d)/(2*d), h=Math.sqrt(Math.max(0,r0*r0-a*a));
+  const xm=c0[0]+a*dx/d, ym=c0[1]+a*dy/d, rx=-dy*h/d, ry=dx*h/d;
+  return [[xm+rx,ym+ry],[xm-rx,ym-ry]];
+}
+const SLOT_POS = {};
+for(const [id,mem] of MEMBERSHIP) {
+  const a=mem[0], b=mem[1], ca=FAMILY[a.family].c, cb=FAMILY[b.family].c;
+  const candidates=circleIntersections(ca,a.r,cb,b.r), target=FACE_TARGET[id[0]];
+  let best=candidates[0], bd=Infinity;
+  for(const p of candidates){ const d=Math.hypot(p[0]-target[0], p[1]-target[1]); if(d<bd){ bd=d; best=p; } }
+  SLOT_POS[id]=best;
+}
+let slotColor={};
+function reset2D(){ slotColor={}; for(const id of MEMBERSHIP.keys()) slotColor[id]=COLORS[id[0]]; }
+reset2D();
+function faceMapping(prefix,counter) {
+  const f=FS[prefix], map=[];
+  if(counter){
+    map.push([f.NW,f.SW],[f.NE,f.NW],[f.SE,f.NE],[f.SW,f.SE]);
+    map.push([f.W,f.S],[f.N,f.W],[f.E,f.N],[f.S,f.E]);
+  } else {
+    map.push([f.SW,f.NW],[f.NW,f.NE],[f.NE,f.SE],[f.SE,f.SW]);
+    map.push([f.S,f.W],[f.W,f.N],[f.N,f.E],[f.E,f.S]);
+  }
+  return map;
+}
+
+// ---------- seven-stage rule solver (independent of history) ----------
+// The solver has its own exact 54-sticker permutation model generated from
+// the same 3D face rotations as the rigid cube.  It therefore plans from the
+// current state, not from the list of moves that produced it.
+function ruleSlotKey(p,n){ return p.join(",")+"|"+n.join(","); }
+const RULE_SLOTS=[];
+const RULE_PIECE_SLOTS=new Map();
+for(let x=-1;x<=1;x++) for(let y=-1;y<=1;y++) for(let z=-1;z<=1;z++){
+  if(x===0&&y===0&&z===0) continue;
+  const p=[x,y,z], ns=[];
+  if(x=== 1) ns.push([ 1,0,0]); if(x===-1) ns.push([-1,0,0]);
+  if(y=== 1) ns.push([0, 1,0]); if(y===-1) ns.push([0,-1,0]);
+  if(z=== 1) ns.push([0,0, 1]); if(z===-1) ns.push([0,0,-1]);
+  const pk=p.join(",");
+  RULE_PIECE_SLOTS.set(pk,[]);
+  for(const n of ns){
+    const s={key:ruleSlotKey(p,n),p:p.slice(),n:n.slice(),home:p.slice()};
+    RULE_PIECE_SLOTS.get(pk).push(RULE_SLOTS.length);
+    RULE_SLOTS.push(s);
+  }
+}
+const RULE_IDS=RULE_SLOTS.map(s=>s.key);
+const RULE_IDX=Object.fromEntries(RULE_IDS.map((s,i)=>[s,i]));
+const RULE_N=RULE_IDS.length;
+function ruleQuarterPerm(face,inverse=false){
+  const perm=Array.from({length:RULE_N},(_,i)=>i);
+  const {axis,dir}=FACES[face], sg=dir*(inverse?-1:1);
+  for(let i=0;i<RULE_N;i++){
+    const s=RULE_SLOTS[i];
+    if(s.p[axis]!==dir) continue;
+    const np=rotDiscrete(s.p,axis,sg), nn=rotDiscrete(s.n,axis,sg);
+    perm[i]=RULE_IDX[ruleSlotKey(np,nn)];
+  }
+  return perm;
+}
+function ruleCompose(p,q){ const r=new Array(RULE_N); for(let i=0;i<RULE_N;i++) r[i]=q[p[i]]; return r; }
+const RULE_PERM={};
+for(const f of "URFDLB"){
+  RULE_PERM[f]=ruleQuarterPerm(f,false);
+  RULE_PERM[f+"'"]=ruleQuarterPerm(f,true);
+  const a=RULE_PERM[f], p=new Array(RULE_N);
+  for(let i=0;i<RULE_N;i++) p[i]=a[a[i]];
+  RULE_PERM[f+"2"]=p;
+}
+function ruleAlgPerm(alg){
+  let p=Array.from({length:RULE_N},(_,i)=>i);
+  for(const m of alg) p=ruleCompose(p,RULE_PERM[m]);
+  return p;
+}
+function ruleApplyState(state,perm){
+  const out=new Array(RULE_N);
+  for(let i=0;i<RULE_N;i++) out[perm[i]]=state[i];
+  return out;
+}
+function ruleApplyAlg(state,alg){ return ruleApplyState(state,ruleAlgPerm(alg)); }
+function ruleIdentity(){ return Array.from({length:RULE_N},(_,i)=>i); }
+function ruleInvMove(m){ if(m.endsWith("2")) return m; return m.endsWith("'")?m[0]:m+"'"; }
+function ruleInvAlg(a){ return a.slice().reverse().map(ruleInvMove); }
+function ruleParse(s){ return s.trim()?s.trim().split(/\s+/):[]; }
+// Conventional beginner algorithms use clockwise notation; our geometric
+// renderer's positive rotations are the opposite convention, so toggle prime.
+function ruleStdToOur(a){ return a.map(m=>m.endsWith("2")?m:(m.endsWith("'")?m[0]:m+"'")); }
+function ruleX2(a){ const mp={U:"D",D:"U",F:"B",B:"F",R:"R",L:"L"}; return a.map(m=>mp[m[0]]+m.slice(1)); }
+function ruleYSub(a,k){
+  const cyc=["F","R","B","L"];
+  return a.map(m=>cyc.includes(m[0])?cyc[(cyc.indexOf(m[0])+k)%4]+m.slice(1):m);
+}
+function ruleExact(state,set){ for(const i of set) if(state[i]!==i) return false; return true; }
+function ruleTokenColor(token){
+  const n=RULE_SLOTS[token].n;
+  if(n[1]=== 1) return "U"; if(n[1]===-1) return "D";
+  if(n[0]=== 1) return "R"; if(n[0]===-1) return "L";
+  if(n[2]=== 1) return "F"; return "B";
+}
+function ruleSetFor(pred){
+  const out=[];
+  for(const [k,is] of RULE_PIECE_SLOTS){ const p=k.split(",").map(Number); if(pred(p,is)) out.push(...is); }
+  return [...new Set(out)];
+}
+const RULE_CROSS=ruleSetFor((p,is)=>p[1]===1&&is.length===2);
+const RULE_FIRST=ruleSetFor((p,is)=>p[1]===1);
+const RULE_F2L=ruleSetFor((p,is)=>p[1]>=0);
+const RULE_DFACE=RULE_SLOTS.map((s,i)=>({s,i})).filter(x=>x.s.n[1]===-1).map(x=>x.i);
+const RULE_DEDGEFACE=RULE_SLOTS.map((s,i)=>({s,i})).filter(x=>x.s.n[1]===-1&&RULE_PIECE_SLOTS.get(x.s.home.join(",")).length===2).map(x=>x.i);
+const RULE_DCORNER=ruleSetFor((p,is)=>p[1]===-1&&is.length===3);
+const RULE_DLAYER=ruleSetFor((p,is)=>p[1]===-1);
+const RULE_CORNER_TOKENS=RULE_FIRST.filter(i=>!RULE_CROSS.includes(i)&&RULE_PIECE_SLOTS.get(RULE_SLOTS[i].home.join(",")).length===3);
+const RULE_MIDDLE_TOKENS=RULE_F2L.filter(i=>!RULE_FIRST.includes(i)&&RULE_PIECE_SLOTS.get(RULE_SLOTS[i].home.join(",")).length===2);
+const ruleGoal1=s=>ruleExact(s,RULE_CROSS);
+const ruleGoal2=s=>ruleExact(s,RULE_FIRST);
+const ruleGoal3=s=>ruleExact(s,RULE_F2L);
+const ruleGoal4=s=>ruleGoal3(s)&&RULE_DEDGEFACE.every(i=>ruleTokenColor(s[i])==="D");
+const ruleGoal5=s=>ruleGoal3(s)&&RULE_DFACE.every(i=>ruleTokenColor(s[i])==="D");
+const ruleGoal6=s=>ruleGoal5(s)&&ruleExact(s,RULE_DCORNER);
+const ruleGoal7=s=>ruleExact(s,Array.from({length:RULE_N},(_,i)=>i));
+function ruleTokenPositions(state,tokens){
+  const pos=new Array(RULE_N);
+  for(let i=0;i<RULE_N;i++) pos[state[i]]=i;
+  return tokens.map(t=>pos[t]);
+}
+function ruleVecKey(v){ return v.join(","); }
+function ruleVecEq(a,b){ if(a.length!==b.length) return false; for(let i=0;i<a.length;i++) if(a[i]!==b[i]) return false; return true; }
+function ruleMacro(name,alg){ return {name,alg,perm:ruleAlgPerm(alg)}; }
+function ruleUniqueMacros(ms){
+  const seen=new Set(),out=[];
+  for(const m of ms){ const k=m.alg.join(" "); if(!seen.has(k)){seen.add(k);out.push(m);} }
+  return out;
+}
+// Compact BFS on positions of selected sticker tokens.  This keeps the
+// browser memory small even on mobile.
+function ruleBfsPositions(startVec,goalVec,macros,maxNodes=400000){
+  if(ruleVecEq(startVec,goalVec)) return [];
+  const nodes=[{v:startVec,parent:-1,via:-1}], seen=new Map([[ruleVecKey(startVec),0]]);
+  let qi=0;
+  while(qi<nodes.length){
+    const ni=qi++, node=nodes[ni];
+    for(let mi=0;mi<macros.length;mi++){
+      const mac=macros[mi], nv=node.v.map(p=>mac.perm[p]), k=ruleVecKey(nv);
+      if(seen.has(k)) continue;
+      const idxNode=nodes.length;
+      nodes.push({v:nv,parent:ni,via:mi}); seen.set(k,idxNode);
+      if(ruleVecEq(nv,goalVec)){
+        const seq=[]; let cur=idxNode;
+        while(nodes[cur].parent!==-1){ seq.push(macros[nodes[cur].via].alg); cur=nodes[cur].parent; }
+        seq.reverse(); return seq.flat();
+      }
+      if(nodes.length>maxNodes) throw new Error("Слишком большой поиск на этапе");
+    }
+  }
+  return null;
+}
+const RULE_MOVES=["U","U'","U2","R","R'","R2","F","F'","F2","D","D'","D2","L","L'","L2","B","B'","B2"];
+function ruleSolveCross(state){
+  const s=ruleTokenPositions(state,RULE_CROSS), g=RULE_CROSS.slice();
+  const sk=ruleVecKey(s), gk=ruleVecKey(g); if(sk===gk) return [];
+  let fa=new Map([[sk,{v:s,path:[]}]]), fb=new Map([[gk,{v:g,path:[]}]]);
+  let sa=new Map(fa), sb=new Map(fb);
+  for(let depth=0;depth<12;depth++){
+    let A=fa,SA=sa,SB=sb,fromStart=true;
+    if(fa.size>fb.size){A=fb;SA=sb;SB=sa;fromStart=false;}
+    const nx=new Map();
+    for(const node of A.values()){
+      for(const m of RULE_MOVES){
+        if(node.path.length&&node.path[node.path.length-1][0]===m[0]) continue;
+        const nv=node.v.map(p=>RULE_PERM[m][p]), nk=ruleVecKey(nv);
+        if(SA.has(nk)) continue;
+        const np=node.path.concat([m]), nn={v:nv,path:np}; SA.set(nk,nn); nx.set(nk,nn);
+        if(SB.has(nk)){
+          const other=SB.get(nk).path;
+          return fromStart?np.concat(ruleInvAlg(other)):other.concat(ruleInvAlg(np));
+        }
+      }
+    }
+    if(fromStart) fa=nx; else fb=nx;
+  }
+  return null;
+}
+function ruleBuildMacros(){
+  const out={};
+  let m2=[ruleMacro("D",["D"]),ruleMacro("D'",["D'"]),ruleMacro("D2",["D2"])];
+  const twist=ruleParse("R' D' R D");
+  for(let k=0;k<4;k++){ const a=ruleStdToOur(ruleYSub(twist,k)); m2.push(ruleMacro("corner",a),ruleMacro("cornerInv",ruleInvAlg(a))); }
+  out.m2=ruleUniqueMacros(m2).filter(m=>ruleExact(ruleApplyState(ruleIdentity(),m.perm),RULE_CROSS));
+
+  let m3=[ruleMacro("D",["D"]),ruleMacro("D'",["D'"]),ruleMacro("D2",["D2"])];
+  const right=ruleX2(ruleParse("U R U' R' U' F' U F"));
+  const left =ruleX2(ruleParse("U' L' U L U F U' F'"));
+  for(let k=0;k<4;k++) for(const aa of [ruleYSub(right,k),ruleYSub(left,k)]){
+    const a=ruleStdToOur(aa); m3.push(ruleMacro("insert",a),ruleMacro("insertInv",ruleInvAlg(a)));
+  }
+  out.m3=ruleUniqueMacros(m3).filter(m=>ruleExact(ruleApplyState(ruleIdentity(),m.perm),RULE_FIRST));
+
+  let m4=[ruleMacro("D",["D"]),ruleMacro("D'",["D'"]),ruleMacro("D2",["D2"])];
+  const crossAlg=ruleX2(ruleParse("F R U R' U' F'"));
+  for(let k=0;k<4;k++){ const a=ruleStdToOur(ruleYSub(crossAlg,k)); m4.push(ruleMacro("lastCross",a),ruleMacro("lastCrossInv",ruleInvAlg(a))); }
+  out.m4=ruleUniqueMacros(m4).filter(m=>ruleGoal3(ruleApplyState(ruleIdentity(),m.perm)));
+
+  let m5=[ruleMacro("D",["D"]),ruleMacro("D'",["D'"]),ruleMacro("D2",["D2"])];
+  for(const base of ["R U R' U R U2 R'","R' U' R U' R' U2 R"]){
+    const su=ruleX2(ruleParse(base));
+    for(let k=0;k<4;k++){ const a=ruleStdToOur(ruleYSub(su,k)); m5.push(ruleMacro("sune",a),ruleMacro("suneInv",ruleInvAlg(a))); }
+  }
+  out.m5=ruleUniqueMacros(m5).filter(m=>ruleGoal4(ruleApplyState(ruleIdentity(),m.perm)));
+
+  let m6=[ruleMacro("D",["D"]),ruleMacro("D'",["D'"]),ruleMacro("D2",["D2"])];
+  for(const base of ["R' F R' B2 R F' R' B2 R2","R2 B2 R F R' B2 R F' R"]){
+    const cp=ruleX2(ruleParse(base));
+    for(let k=0;k<4;k++){ const a=ruleStdToOur(ruleYSub(cp,k)); m6.push(ruleMacro("cornerPerm",a),ruleMacro("cornerPermInv",ruleInvAlg(a))); }
+  }
+  out.m6=ruleUniqueMacros(m6).filter(m=>ruleGoal5(ruleApplyState(ruleIdentity(),m.perm)));
+
+  let m7=[];
+  for(const base of ["R U' R U R U R U' R' U' R2","R2 U R U R' U' R' U' R' U R'"]){
+    const up=ruleX2(ruleParse(base));
+    for(let k=0;k<4;k++){ const a=ruleStdToOur(ruleYSub(up,k)); m7.push(ruleMacro("edgePerm",a),ruleMacro("edgePermInv",ruleInvAlg(a))); }
+  }
+  out.m7=ruleUniqueMacros(m7).filter(m=>ruleGoal6(ruleApplyState(ruleIdentity(),m.perm)));
+  return out;
+}
+const RULE_MACROS=ruleBuildMacros();
+const RULE_DLOCAL=Object.fromEntries(RULE_DLAYER.map((s,i)=>[s,i]));
+const RULE_DFACE_LOCAL=RULE_DFACE.map(i=>RULE_DLOCAL[i]);
+const RULE_DEDGE_LOCAL=RULE_DEDGEFACE.map(i=>RULE_DLOCAL[i]);
+const RULE_DCORNER_LOCAL=RULE_DCORNER.map(i=>RULE_DLOCAL[i]);
+for(const group of [RULE_MACROS.m4,RULE_MACROS.m5,RULE_MACROS.m6,RULE_MACROS.m7]){
+  for(const m of group){
+    m.dmap=RULE_DLAYER.map(s=>RULE_DLOCAL[m.perm[s]]);
+  }
+}
+function ruleDVec(state){ return RULE_DLAYER.map(s=>state[s]); }
+function ruleApplyDVec(v,dmap){ const out=new Array(v.length); for(let i=0;i<v.length;i++) out[dmap[i]]=v[i]; return out; }
+function ruleDGoal4(v){ return RULE_DEDGE_LOCAL.every(i=>ruleTokenColor(v[i])==="D"); }
+function ruleDGoal5(v){ return RULE_DFACE_LOCAL.every(i=>ruleTokenColor(v[i])==="D"); }
+function ruleDGoal6(v){ return ruleDGoal5(v)&&RULE_DCORNER_LOCAL.every(i=>v[i]===RULE_DLAYER[i]); }
+function ruleDGoal7(v){ return v.every((x,i)=>x===RULE_DLAYER[i]); }
+function ruleBfsD(startVec,goal,macros,maxNodes=250000){
+  if(goal(startVec)) return [];
+  const nodes=[{v:startVec,parent:-1,via:-1}], seen=new Map([[ruleVecKey(startVec),0]]);
+  let qi=0;
+  while(qi<nodes.length){
+    const ni=qi++, node=nodes[ni];
+    for(let mi=0;mi<macros.length;mi++){
+      const m=macros[mi], nv=ruleApplyDVec(node.v,m.dmap), k=ruleVecKey(nv);
+      if(seen.has(k)) continue;
+      const ci=nodes.length; nodes.push({v:nv,parent:ni,via:mi}); seen.set(k,ci);
+      if(goal(nv)){
+        const seq=[]; let cur=ci;
+        while(nodes[cur].parent!==-1){ seq.push(macros[nodes[cur].via].alg); cur=nodes[cur].parent; }
+        seq.reverse(); return seq.flat();
+      }
+      if(nodes.length>maxNodes) throw new Error("Слишком большой поиск последнего слоя");
+    }
+  }
+  return null;
+}
+const RULE_STAGE_META=[
+  {name:"Крест",desc:"Ставим четыре ребра первого (зелёного) слоя."},
+  {name:"Первый слой",desc:"Ставим четыре угла, сохраняя готовый крест."},
+  {name:"Средний слой",desc:"Вставляем четыре средних ребра."},
+  {name:"Последний крест",desc:"Ориентируем четыре ребра последнего (синего) слоя."},
+  {name:"Ориентация",desc:"Разворачиваем все наклейки последней грани наружу."},
+  {name:"Углы",desc:"Переставляем углы последнего слоя на правильные места."},
+  {name:"Рёбра",desc:"Циклируем последние рёбра до полной сборки."}
+];
+function ruleSolveStages(initial){
+  let s=initial.slice(); const plans=[];
+  let a=ruleSolveCross(s); if(a==null) throw new Error("Не удалось построить крест");
+  s=ruleApplyAlg(s,a); plans.push(a); if(!ruleGoal1(s)) throw new Error("Ошибка этапа 1");
+
+  let sv=ruleTokenPositions(s,RULE_CORNER_TOKENS), gv=RULE_CORNER_TOKENS.slice();
+  a=ruleBfsPositions(sv,gv,RULE_MACROS.m2); if(a==null) throw new Error("Не удалось собрать первый слой");
+  s=ruleApplyAlg(s,a); plans.push(a); if(!ruleGoal2(s)) throw new Error("Ошибка этапа 2");
+
+  sv=ruleTokenPositions(s,RULE_MIDDLE_TOKENS); gv=RULE_MIDDLE_TOKENS.slice();
+  a=ruleBfsPositions(sv,gv,RULE_MACROS.m3); if(a==null) throw new Error("Не удалось собрать средний слой");
+  s=ruleApplyAlg(s,a); plans.push(a); if(!ruleGoal3(s)) throw new Error("Ошибка этапа 3");
+
+  let dv=ruleDVec(s);
+  a=ruleBfsD(dv,ruleDGoal4,RULE_MACROS.m4); if(a==null) throw new Error("Не удалось построить последний крест");
+  s=ruleApplyAlg(s,a); plans.push(a);
+  dv=ruleDVec(s);
+  a=ruleBfsD(dv,ruleDGoal5,RULE_MACROS.m5); if(a==null) throw new Error("Не удалось ориентировать последнюю грань");
+  s=ruleApplyAlg(s,a); plans.push(a);
+  dv=ruleDVec(s);
+  a=ruleBfsD(dv,ruleDGoal6,RULE_MACROS.m6); if(a==null) throw new Error("Не удалось переставить углы");
+  s=ruleApplyAlg(s,a); plans.push(a);
+  dv=ruleDVec(s);
+  a=ruleBfsD(dv,ruleDGoal7,RULE_MACROS.m7); if(a==null) throw new Error("Не удалось переставить рёбра");
+  s=ruleApplyAlg(s,a); plans.push(a);
+  if(!ruleGoal7(s)) throw new Error("План не завершил сборку");
+  return plans.map((moves,i)=>({...RULE_STAGE_META[i],moves}));
+}
+let solverState=ruleIdentity();
+let rulePlan=null, rulePlanCursor=0, rulePlanning=false;
+function graphInverseForCube(face,inverse){ return inverse !== "URF".includes(face); }
+
+// ---------- rigid-body cube state ----------
+function matIdentity(){ return [1,0,0, 0,1,0, 0,0,1]; }
+function matVec(m,v){
+  const [x,y,z]=v;
+  return [
+    m[0]*x+m[1]*y+m[2]*z,
+    m[3]*x+m[4]*y+m[5]*z,
+    m[6]*x+m[7]*y+m[8]*z
+  ];
+}
+function matMul(a,b){
+  const r=new Array(9).fill(0);
+  for(let i=0;i<3;i++) for(let j=0;j<3;j++)
+    for(let k=0;k<3;k++) r[i*3+j]+=a[i*3+k]*b[k*3+j];
+  return r;
+}
+function matFromColumns(c0,c1,c2){
+  return [c0[0],c1[0],c2[0], c0[1],c1[1],c2[1], c0[2],c1[2],c2[2]];
+}
+function rotMat(axis,ang){
+  return matFromColumns(
+    rotAxis([1,0,0],axis,ang),
+    rotAxis([0,1,0],axis,ang),
+    rotAxis([0,0,1],axis,ang)
+  );
+}
+function quarterMat(axis,sgn){
+  const cols=[
+    rot90([1,0,0],axis,sgn),
+    rot90([0,1,0],axis,sgn),
+    rot90([0,0,1],axis,sgn)
+  ];
+  return matFromColumns(cols[0],cols[1],cols[2]);
+}
+function cleanMat(m){ return m.map(x=>Math.abs(x)<1e-10?0:(Math.abs(x-1)<1e-10?1:(Math.abs(x+1)<1e-10?-1:x))); }
+
+function makeCube(){
+  const out=[];
+  for(let x=-1;x<=1;x++) for(let y=-1;y<=1;y++) for(let z=-1;z<=1;z++) {
+    if(x===0&&y===0&&z===0) continue;
+    const stickers=[];
+    // Sticker normals are LOCAL to the cubie. Orientation moves them as a rigid body.
+    if(x=== 1) stickers.push({n:[ 1,0,0],color:CUBE_COL.R});
+    if(x===-1) stickers.push({n:[-1,0,0],color:CUBE_COL.L});
+    if(y=== 1) stickers.push({n:[0, 1,0],color:CUBE_COL.U});
+    if(y===-1) stickers.push({n:[0,-1,0],color:CUBE_COL.D});
+    if(z=== 1) stickers.push({n:[0,0, 1],color:CUBE_COL.F});
+    if(z===-1) stickers.push({n:[0,0,-1],color:CUBE_COL.B});
+    out.push({p:[x,y,z], orient:matIdentity(), stickers});
+  }
+  return out;
+}
+let cubies=makeCube();
+
+function applyCube(face,inverse){
+  const {axis,dir}=FACES[face];
+  const sg=dir*(inverse?-1:1);
+  const R=quarterMat(axis,sg);
+  for(const c of cubies){
+    if(c.p[axis]!==dir) continue;
+    c.p=rotDiscrete(c.p,axis,sg);
+    c.orient=cleanMat(matMul(R,c.orient));
+  }
+}
+
+// ---------- animation queue ----------
+let queue=[], anim=null, history=[];
+function ringPoint(srcId,dstId,ringName,inverse,t){
+  const [family,kind]=RING_META[ringName], c=FAMILY[family].c, radius=RADIUS[kind];
+  const p0=SLOT_POS[srcId], p1=SLOT_POS[dstId];
+  const a0=Math.atan2(p0[1]-c[1], p0[0]-c[0]), a1=Math.atan2(p1[1]-c[1], p1[0]-c[0]);
+  let delta=normAngle(a1-a0);
+  if(!inverse){ while(delta<=0) delta+=Math.PI*2; }
+  else { while(delta>=0) delta-=Math.PI*2; }
+  const a=a0+delta*t;
+  return [c[0]+Math.cos(a)*radius, c[1]+Math.sin(a)*radius];
+}
+function buildAnimation(face,inverse,kind,recordMove,stageIndex=null){
+  const meta=MOVE_META[face], ring=RINGS[meta.ring], ringMoves=[];
+  // The original 2D graph uses a mirrored convention on U/R/F.  Mapping it
+  // here makes the graph and the rigid 3D cube represent the same group state.
+  const graphInverse=graphInverseForCube(face,inverse);
+  for(let i=0;i<12;i++){
+    const j=(i+(graphInverse?-3:3)+12)%12;
+    ringMoves.push({src:ring[i],dst:ring[j],color:slotColor[ring[i]]});
+  }
+  let faceCounter=graphInverse; if(["D","B","L"].includes(face)) faceCounter=!faceCounter;
+  const faceMoves=faceMapping(meta.face,faceCounter).map(([src,dst])=>({src,dst,color:slotColor[src]}));
+  const speed=Number(document.getElementById('speed').value)||.35;
+  const base=kind==="scramble"?300:kind==="solve"?500:750;
+  return { face,inverse,graphInverse,kind,recordMove,stageIndex,ringName:meta.ring,ringMoves,faceMoves,start:performance.now(),duration:base/speed };
+}
+function finishAnimation(){
+  const a=anim, old={...slotColor}, ring=RINGS[a.ringName];
+  for(let i=0;i<12;i++) { const j=(i+(a.graphInverse?-3:3)+12)%12; slotColor[ring[j]]=old[ring[i]]; }
+  for(const m of a.faceMoves) slotColor[m.dst]=old[m.src];
+  applyCube(a.face,a.inverse);
+  solverState=ruleApplyState(solverState,RULE_PERM[a.face+(a.inverse?"'":"")]);
+  if(a.recordMove) history.push(a.face+(a.inverse?"'":""));
+  const finishedStage=a.stageIndex;
+  const nextStage=queue.length?queue[0].stageIndex:null;
+  if(finishedStage!=null&&nextStage!==finishedStage){ markRuleStageDone(finishedStage); rulePlanCursor=Math.max(rulePlanCursor,finishedStage+1); }
+  anim=null; kick();
+}
+function enqueueQuarter(face,inverse=false,kind="manual",record=true,stageIndex=null){ queue.push({face,inverse,kind,record,stageIndex}); syncButtons(); kick(); }
+function enqueueMove(m,kind="manual",record=true,stageIndex=null){
+  const face=m[0], inverse=m.endsWith("'");
+  if(m.endsWith("2")){ enqueueQuarter(face,false,kind,record,stageIndex); enqueueQuarter(face,false,kind,record,stageIndex); }
+  else enqueueQuarter(face,inverse,kind,record,stageIndex);
+}
+function kick(){
+  if(anim) return;
+  const q=queue.shift();
+  if(!q){ syncButtons(); if(rulePlan&&ruleGoal7(solverState)) setSolverStatus("Кубик собран по всем семи этапам.",""); return; }
+  if(q.stageIndex!=null) setRuleStageActive(q.stageIndex);
+  anim=buildAnimation(q.face,q.inverse,q.kind,q.record,q.stageIndex);
+}
+function syncButtons(){
+  const busy=!!anim||queue.length>0||rulePlanning;
+  ["scramble","solve","nextStage","reset"].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=busy;});
+  document.querySelectorAll('#moves button').forEach(b=>b.disabled=busy);
+}
+function resetAll(){
+  queue.length=0; history.length=0; anim=null; reset2D(); cubies=makeCube(); solverState=ruleIdentity();
+  invalidateRulePlan(); syncButtons(); setSolverStatus("Готово. Перемешайте кубик и запустите сборку.","");
+}
+
+// ---------- left rigid-body 3D canvas ----------
+const cubeCanvas=document.getElementById('cubeCanvas');
+const cctx=cubeCanvas.getContext('2d');
+let viewYaw=-0.68, viewPitch=0.58;
+let dragging=false, lastMX=0, lastMY=0;
+function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
+function resizeCanvas(canvas, ctx){
+  const dpr=Math.min(window.devicePixelRatio||1,2), rect=canvas.getBoundingClientRect();
+  const pw=Math.round(rect.width*dpr), ph=Math.round(rect.height*dpr);
+  if(canvas.width!==pw || canvas.height!==ph){ canvas.width=pw; canvas.height=ph; }
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  return rect;
+}
+function rotateView(v){
+  let [x,y,z]=v;
+  const cy=Math.cos(viewYaw), sy=Math.sin(viewYaw);
+  [x,z]=[x*cy+z*sy, -x*sy+z*cy];
+  const cx=Math.cos(viewPitch), sx=Math.sin(viewPitch);
+  [y,z]=[y*cx-z*sx, y*sx+z*cx];
+  return [x,y,z];
+}
+function projectWorld(p,w,h){
+  const [x,y,z]=rotateView(p);
+  const f=7.4, k=f/(f-z), s=Math.min(w,h)*0.19;
+  return {X:w*.5+x*s*k, Y:h*.56-y*s*k, Z:z, K:k};
+}
+
+const LOCAL_NORMALS=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+function basisForNormal(n){
+  if(Math.abs(n[0])>.5) return [[0,1,0],[0,0,1]];
+  if(Math.abs(n[1])>.5) return [[1,0,0],[0,0,1]];
+  return [[1,0,0],[0,1,0]];
+}
+function localFaceQuad(n,plane,half){
+  const [u,v]=basisForNormal(n);
+  return [[-1,-1],[1,-1],[1,1],[-1,1]].map(([a,b])=>[
+    n[0]*plane + u[0]*a*half + v[0]*b*half,
+    n[1]*plane + u[1]*a*half + v[1]*b*half,
+    n[2]*plane + u[2]*a*half + v[2]*b*half
+  ]);
+}
+function transformPoint(local,center,O){
+  const q=matVec(O,local);
+  return [center[0]+q[0],center[1]+q[1],center[2]+q[2]];
+}
+function currentRigidTransform(c,progress){
+  let center=c.p.slice(), O=c.orient;
+  if(anim){
+    const {axis,dir}=FACES[anim.face];
+    if(c.p[axis]===dir){
+      const ang=dir*(anim.inverse?-1:1)*(Math.PI/2)*progress;
+      const R=rotMat(axis,ang);
+      center=matVec(R,c.p);
+      O=matMul(R,c.orient);
+    }
+  }
+  return {center,O};
+}
+function polygonFromLocal(center,O,localQuad,localNormal,w,h,kind,color){
+  const worldNormal=matVec(O,localNormal);
+  const viewNormal=rotateView(worldNormal);
+  // camera looks down -Z in view space; positive Z-normal faces the camera here
+  if(viewNormal[2] <= 0.015) return null;
+  const world=localQuad.map(q=>transformPoint(q,center,O));
+  const proj=world.map(q=>projectWorld(q,w,h));
+  const depth=proj.reduce((s,p)=>s+p.Z,0)/4;
+  return {proj,depth,kind,color};
+}
+function drawCube3D(progress){
+  const rect=resizeCanvas(cubeCanvas,cctx), w=rect.width, h=rect.height;
+  cctx.clearRect(0,0,w,h);
+  const polys=[];
+  const bodyHalf=.455;
+  const stickerHalf=.355;
+  const stickerPlane=.472;
+
+  for(const c of cubies){
+    const {center,O}=currentRigidTransform(c,progress);
+
+    // Full dark cubie first: all six local faces rotate rigidly.
+    for(const n of LOCAL_NORMALS){
+      const poly=polygonFromLocal(center,O,localFaceQuad(n,bodyHalf,bodyHalf),n,w,h,'body','#181614');
+      if(poly) polys.push(poly);
+    }
+
+    // Then external stickers. Their local plane never changes shape; the whole cubie rotates.
+    for(const st of c.stickers){
+      const poly=polygonFromLocal(center,O,localFaceQuad(st.n,stickerPlane,stickerHalf),st.n,w,h,'sticker',st.color);
+      if(poly) polys.push(poly);
+    }
+  }
+
+  polys.sort((a,b)=> a.depth===b.depth ? (a.kind==='body'?-1:1) : a.depth-b.depth);
+  cctx.lineJoin='round';
+  for(const p of polys){
+    cctx.beginPath();
+    cctx.moveTo(p.proj[0].X,p.proj[0].Y);
+    for(let i=1;i<4;i++) cctx.lineTo(p.proj[i].X,p.proj[i].Y);
+    cctx.closePath();
+    if(p.kind==='body'){
+      cctx.fillStyle=p.color; cctx.fill();
+      cctx.strokeStyle='#090807'; cctx.lineWidth=1.1; cctx.stroke();
+    } else {
+      cctx.fillStyle=p.color; cctx.fill();
+      cctx.strokeStyle='rgba(20,18,16,.72)'; cctx.lineWidth=1.35; cctx.stroke();
+    }
+  }
+}
+
+cubeCanvas.addEventListener('pointerdown', e=>{
+  dragging=true; lastMX=e.clientX; lastMY=e.clientY;
+  try{cubeCanvas.setPointerCapture(e.pointerId);}catch(_e){}
+});
+cubeCanvas.addEventListener('pointermove', e=>{
+  if(!dragging) return;
+  const dx=e.clientX-lastMX, dy=e.clientY-lastMY;
+  lastMX=e.clientX; lastMY=e.clientY;
+  viewYaw += dx*.012;
+  viewPitch = clamp(viewPitch + dy*.012,-1.25,1.25);
+});
+cubeCanvas.addEventListener('pointerup', ()=>dragging=false);
+cubeCanvas.addEventListener('pointercancel', ()=>dragging=false);
+
+// ---------- right graph drawing ----------
+const graphCanvas=document.getElementById('graphCanvas');
+const gctx=graphCanvas.getContext('2d');
+function graphTransform(w,h){ const s=Math.min((w-20)/REF_W, (h-20)/REF_H); return {s, ox:(w-REF_W*s)/2, oy:(h-REF_H*s)/2}; }
+function gp(p,w,h){ const t=graphTransform(w,h); return {x:t.ox+p[0]*t.s, y:t.oy+p[1]*t.s}; }
+function drawDot(x,y,r,color,moving){ gctx.beginPath(); gctx.arc(x,y,r,0,Math.PI*2); gctx.fillStyle=color; gctx.fill(); gctx.strokeStyle=moving?"rgba(45,39,32,.96)":"rgba(45,39,32,.78)"; gctx.lineWidth=moving?2.4:1.5; gctx.stroke(); }
+function drawCircleGraph(progress){
+  const rect=resizeCanvas(graphCanvas, gctx), w=rect.width, h=rect.height;
+  gctx.clearRect(0,0,w,h);
+  const t=graphTransform(w,h), activeRing=anim?anim.ringName:null;
+  for(const family of ["Top","Left","Right"]){
+    for(const kind of ["Inner","Middle","Outer"]){
+      const ringName=family+kind, c=gp(FAMILY[family].c, w, h);
+      gctx.beginPath(); gctx.arc(c.x, c.y, RADIUS[kind]*t.s, 0, Math.PI*2);
+      const hot=ringName===activeRing; gctx.strokeStyle=hot?"rgba(73,62,49,.90)":"rgba(105,96,83,.48)"; gctx.lineWidth=hot?2.7:1.25; gctx.stroke();
+    }
+  }
+  const moving=new Set();
+  if(anim){ for(const m of anim.ringMoves) moving.add(m.src); for(const m of anim.faceMoves) moving.add(m.src); }
+  const rr=Math.max(5.3, 8.8*t.s);
+  for(const id of MEMBERSHIP.keys()){
+    if(moving.has(id)) continue;
+    const p=gp(SLOT_POS[id], w, h); drawDot(p.x,p.y,rr,slotColor[id],false);
+  }
+  if(anim){
+    for(const m of anim.ringMoves){ const q=ringPoint(m.src,m.dst,anim.ringName,anim.graphInverse,progress), p=gp(q,w,h); drawDot(p.x,p.y,rr*1.04,m.color,true); }
+    for(const m of anim.faceMoves){ const a=SLOT_POS[m.src], b=SLOT_POS[m.dst], q=[a[0]+(b[0]-a[0])*progress, a[1]+(b[1]-a[1])*progress], p=gp(q,w,h); drawDot(p.x,p.y,rr*1.04,m.color,true); }
+  }
+}
+
+// ---------- rule-solver UI ----------
+function renderRuleStages(){
+  const strip=document.getElementById("stageStrip");
+  strip.innerHTML=RULE_STAGE_META.map((s,i)=>`<div class="stage-chip" data-stage="${i}"><span class="n">${i+1}</span><span>${s.name}</span></div>`).join("");
+}
+function setSolverStatus(text,moves=""){
+  document.getElementById("solverStatus").textContent=text;
+  document.getElementById("solverMoves").textContent=moves;
+}
+function clearRuleStageClasses(){ document.querySelectorAll('.stage-chip').forEach(x=>x.classList.remove('active','done')); }
+function setRuleStageActive(i){
+  document.querySelectorAll('.stage-chip').forEach((x,j)=>x.classList.toggle('active',j===i));
+  if(rulePlan&&rulePlan[i]) setSolverStatus(`Этап ${i+1}/7 — ${rulePlan[i].name}: ${rulePlan[i].desc}`,rulePlan[i].moves.join(" "));
+}
+function markRuleStageDone(i){ const e=document.querySelector(`.stage-chip[data-stage="${i}"]`); if(e){e.classList.remove('active');e.classList.add('done');} }
+function invalidateRulePlan(){ rulePlan=null; rulePlanCursor=0; rulePlanning=false; clearRuleStageClasses(); }
+function prepareRulePlan(callback){
+  if(rulePlan){ callback(rulePlan); return; }
+  if(ruleGoal7(solverState)){ rulePlan=RULE_STAGE_META.map(x=>({...x,moves:[]})); rulePlanCursor=7; clearRuleStageClasses(); for(let i=0;i<7;i++)markRuleStageDone(i); setSolverStatus("Кубик уже собран.",""); callback(rulePlan); return; }
+  rulePlanning=true; syncButtons(); setSolverStatus("Рассчитываю семь этапов из текущего состояния…","");
+  setTimeout(()=>{
+    try{
+      const t0=performance.now();
+      rulePlan=ruleSolveStages(solverState.slice()); rulePlanCursor=0;
+      const total=rulePlan.reduce((n,s)=>n+s.moves.length,0), ms=Math.round(performance.now()-t0);
+      clearRuleStageClasses();
+      setSolverStatus(`План готов: ${total} ходов, 7 этапов (${ms} мс).`,`1. ${rulePlan[0].moves.join(" ")}`);
+    }catch(e){
+      console.error(e); rulePlan=null; setSolverStatus("Не удалось построить план: "+e.message,"");
+    }finally{ rulePlanning=false; syncButtons(); callback(rulePlan); }
+  },30);
+}
+function queueRuleStage(i){
+  if(!rulePlan||i<0||i>=rulePlan.length) return;
+  const st=rulePlan[i];
+  setRuleStageActive(i);
+  if(!st.moves.length){ markRuleStageDone(i); rulePlanCursor=i+1; return; }
+  for(const m of st.moves) enqueueMove(m,"solve",false,i);
+}
+function playNextRuleStage(){
+  prepareRulePlan(plan=>{
+    if(!plan) return;
+    let i=rulePlanCursor;
+    while(i<7&&!plan[i].moves.length){markRuleStageDone(i);i++;}
+    rulePlanCursor=i;
+    if(i>=7){setSolverStatus("Все семь этапов уже выполнены.","");return;}
+    queueRuleStage(i);
+  });
+}
+function playAllRuleStages(){
+  prepareRulePlan(plan=>{
+    if(!plan) return;
+    let any=false;
+    for(let i=rulePlanCursor;i<7;i++){
+      if(!plan[i].moves.length){markRuleStageDone(i);rulePlanCursor=i+1;continue;}
+      any=true;
+      for(const m of plan[i].moves) enqueueMove(m,"solve",false,i);
+    }
+    if(!any) setSolverStatus("Кубик уже собран.","");
+  });
+}
+renderRuleStages();
+
+// ---------- UI ----------
+document.getElementById('moves').innerHTML=["U","U'","U2","R","R'","R2","F","F'","F2","D","D'","D2","L","L'","L2","B","B'","B2"].map(m=>`<button data-m="${m}">${m}</button>`).join('');
+document.getElementById('moves').onclick=e=>{ const m=e.target.dataset.m; if(m){invalidateRulePlan();enqueueMove(m,'manual',true);} };
+document.getElementById('scramble').onclick=()=>{
+  invalidateRulePlan();
+  const fs=["U","R","F","D","L","B"]; let last="";
+  for(let i=0;i<22;i++){ let f=fs[Math.floor(Math.random()*fs.length)]; while(f===last) f=fs[Math.floor(Math.random()*fs.length)]; last=f; enqueueQuarter(f,Math.random()<.5,'scramble',true); }
+  setSolverStatus("Перемешивание… После него план строится из состояния кубика, история не используется.","");
+};
+document.getElementById('nextStage').onclick=playNextRuleStage;
+document.getElementById('solve').onclick=playAllRuleStages;
+document.getElementById('reset').onclick=resetAll;
+document.getElementById('speed').oninput=e=>{ document.getElementById('speedVal').textContent=Number(e.target.value).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')+'×'; };
+window.addEventListener('keydown', e=>{ const k=e.key.toUpperCase(); if(!"URFDLB".includes(k)) return; invalidateRulePlan(); enqueueQuarter(k,e.shiftKey,'manual',true); });
+
+// ---------- loop ----------
+function tick(now){
+  let raw=0, e=0;
+  if(anim){ raw=Math.min(1,Math.max(0,(now-anim.start)/anim.duration)); e=timelineEase(raw); }
+  drawCube3D(e);
+  drawCircleGraph(e);
+  if(anim && raw>=1) finishAnimation();
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
