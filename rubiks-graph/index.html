@@ -417,7 +417,6 @@ function commonGraphRing(a,b){
   }
   return null;
 }
-const GRAPH_EDGE_SUFFIX=new Set(["NN","EE","SS","WW"]);
 function graphSegmentLength(seg){
   const [family,kind]=RING_META[seg.ring], c=FAMILY[family].c, r=RADIUS[kind];
   const p0=SLOT_POS[seg.src], p1=SLOT_POS[seg.dst];
@@ -433,7 +432,7 @@ function graphRoute(src,dst){
   // the drawn graph. This keeps the pearl on visible rings for the full move.
   let best=null, bestCost=Infinity;
   for(const mid of Object.keys(GRAPH_TO_RULE)){
-    if(mid[0]!==src[0]||mid===src||mid===dst||!GRAPH_EDGE_SUFFIX.has(mid.slice(1))) continue;
+    if(mid[0]!==src[0]||mid===src||mid===dst||mid.slice(1)==="CC") continue;
     const r0=commonGraphRing(src,mid), r1=commonGraphRing(mid,dst);
     if(!r0||!r1) continue;
     const route=[{src,dst:mid,ring:r0},{src:mid,dst,ring:r1}];
@@ -467,7 +466,7 @@ function verifyGraphProjection(){
       if(moves.length!==20) errors.push(`${face}${inverse?"'":""}: expected 20 moving stickers, got ${moves.length}`);
       if(side.length!==12||own.length!==8) errors.push(`${face}${inverse?"'":""}: expected 12 side + 8 face stickers`);
       if(side.some(m=>m.route.length!==1)||sideRings.size!==1) errors.push(`${face}${inverse?"'":""}: side stickers must share one direct ring`);
-      if(twoLeg.length!==4) errors.push(`${face}${inverse?"'":""}: expected four corner stickers to use two-ring routes, got ${twoLeg.length}`);
+      if(twoLeg.length!==4) errors.push(`${face}${inverse?"'":""}: expected four face stickers to use two-ring routes, got ${twoLeg.length}`);
       if(moves.some(m=>m.route.length<1||m.route.length>2||m.route.some(seg=>!seg.ring))) errors.push(`${face}${inverse?"'":""}: every path must stay on one or two visible rings`);
       checked++;
     }
