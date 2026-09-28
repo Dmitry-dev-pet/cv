@@ -1,0 +1,104 @@
+name: Build jevspin Pages once
+
+on:
+  push:
+    branches:
+      - feature/jevspin-pages
+    paths:
+      - .github/workflows/build-jevspin-pages-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/jevspin-pages
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Fetch exact upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone -q https://github.com/dedene/jevspin.git /tmp/jevspin
+          git -C /tmp/jevspin checkout -q 8d5be44aa3a39bb593a232717b719655bcc03ccf
+          test "$(git -C /tmp/jevspin rev-parse HEAD)" = "8d5be44aa3a39bb593a232717b719655bcc03ccf"
+
+      - name: Add browser mock adapter
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path("/tmp/jevspin/src/client/solve-client.ts")
+          p.write_text(
+          """import type { Mode, SseEvent } from "../events.ts";
+          import { greedyJev, solve } from "../worker/solve.ts";
+
+          export async function* streamSolve(body: {
+            scramble: string;
+            facelets: string;
+            order: 2 | 3 | 4;
+            mode: Mode;
+            turnstileToken: string;
+            signal: AbortSignal;
+          }): AsyncGenerator<SseEvent> {
+            const jev = greedyJev();
+            for await (const ev of solve({
+              scramble: body.scramble,
+              facelets: body.facelets,
+              order: body.order,
+              mode: body.mode,
+              jev,
+            })) {
+              if (body.signal.aborted) return;
+              yield ev;
+              await new Promise<void>((resolve) => setTimeout(resolve, 0));
+            }
+          }
+          """
+          )
+
+          Path("/tmp/jevspin/vite.pages.config.ts").write_text(
+          """import { defineConfig } from "vite";
+
+          export default defineConfig({
+            base: "/cv/jevspin/",
+          });
+          """
+          )
+
+      - name: Build static app
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --global pnpm@10
+          cd /tmp/jevspin
+          pnpm install --frozen-lockfile
+          pnpm exec vite build --config vite.pages.config.ts
+          test -f dist/index.html
+          grep -q '/cv/jevspin/' dist/index.html
+          ! grep -R '"/api/solve"' dist
+
+      - name: Publish generated files into cv
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf jevspin
+          mkdir -p jevspin
+          cp -a /tmp/jevspin/dist/. jevspin/
+
+          rm -f .github/workflows/build-jevspin-pages-once.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add standalone jevspin Pages build"
+          git push origin HEAD:feature/jevspin-pages
