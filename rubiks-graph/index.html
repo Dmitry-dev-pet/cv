@@ -60,6 +60,13 @@
   .stage-chip.done .n::after{content:"✓"}.stage-chip.done .n{font-size:0}.stage-chip.done .n::after{font-size:11px}
   #solverStatus{font-weight:700;color:#3b352e;margin-bottom:5px}
   #solverMoves{color:#7a7167;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-word;font-size:11px;line-height:1.5}
+  .group-box{margin-top:10px;padding:13px 15px;border:1px solid var(--line);border-radius:18px;background:rgba(255,253,248,.68);font:12px/1.4 ui-sans-serif,system-ui,sans-serif}
+  .group-head{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:9px;font-weight:750;color:#3b352e}
+  #graphModelStatus{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#6d675e}
+  .group-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  #algorithmInput{flex:1;min-width:220px;border:1px solid var(--line);border-radius:10px;background:#fffdf8;padding:9px 10px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:#302b25}
+  #algorithmSummary{margin-top:10px;font-weight:700;color:#4a433b}
+  #algorithmCycles{margin-top:5px;white-space:pre-wrap;word-break:break-word;color:#756c62;font:11px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
   @media(max-width:900px){
     header{align-items:flex-start;padding:16px 16px 8px}header p{text-align:left}
     .viz{grid-template-columns:1fr;height:auto;min-height:0;width:calc(100% - 20px);gap:10px}
@@ -188,7 +195,7 @@
 <body>
 <header>
   <h1>3D кубик: сборка по правилам и круговой граф</h1>
-  <p>Слева — rigid-body 3D, справа — круговой граф. «Собрать» теперь решает текущее состояние по семи этапам, а не откатывает историю.</p>
+  <p>Слева — rigid-body 3D, справа — круговой граф. Оба представления теперь получают ходы из одной точной модели перестановок; ниже можно разложить алгоритм на циклы.</p>
 </header>
 <div class="viz">
   <div class="panelbox">
@@ -221,6 +228,16 @@
     <div class="stage-strip" id="stageStrip"></div>
     <div id="solverStatus">Готово. Перемешайте кубик и запустите сборку.</div>
     <div id="solverMoves"></div>
+  </div>
+  <div class="group-box">
+    <div class="group-head"><span>Перестановка и циклы</span><span id="graphModelStatus">проверка модели…</span></div>
+    <div class="group-row">
+      <input id="algorithmInput" value="R U R' U'" aria-label="Алгоритм кубика">
+      <button id="inspectAlgorithm">Показать циклы</button>
+      <button id="playAlgorithm">Проиграть</button>
+    </div>
+    <div id="algorithmSummary"></div>
+    <div id="algorithmCycles"></div>
   </div>
 </div>
 
@@ -290,11 +307,6 @@ const RING_META = {
   LeftInner:["Left","Inner"], LeftMiddle:["Left","Middle"], LeftOuter:["Left","Outer"],
   RightInner:["Right","Inner"], RightMiddle:["Right","Middle"], RightOuter:["Right","Outer"]
 };
-const MOVE_META = {
-  U:{ ring:"TopInner", face:"g" }, D:{ ring:"TopOuter", face:"b" },
-  F:{ ring:"LeftInner", face:"r" }, B:{ ring:"LeftOuter", face:"o" },
-  R:{ ring:"RightInner", face:"w" }, L:{ ring:"RightOuter", face:"y" }
-};
 const MEMBERSHIP = new Map();
 for(const [ringName,items] of Object.entries(RINGS)) {
   const [family,kind]=RING_META[ringName];
@@ -319,21 +331,32 @@ for(const [id,mem] of MEMBERSHIP) {
   for(const p of candidates){ const d=Math.hypot(p[0]-target[0], p[1]-target[1]); if(d<bd){ bd=d; best=p; } }
   SLOT_POS[id]=best;
 }
+// Projection from the symmetric graph layout to the exact physical sticker model.
+// The graph positions are intentionally not a conventional face net; this table is
+// the single bridge between visual slots and RULE_PERM sticker coordinates.
+const GRAPH_RULE_KEY = {
+  "yNW":"-1,-1,-1|-1,0,0","yNN":"-1,0,-1|-1,0,0","yNE":"-1,1,-1|-1,0,0",
+  "yWW":"-1,-1,0|-1,0,0","yCC":"-1,0,0|-1,0,0","yEE":"-1,1,0|-1,0,0",
+  "ySW":"-1,-1,1|-1,0,0","ySS":"-1,0,1|-1,0,0","ySE":"-1,1,1|-1,0,0",
+  "gNW":"-1,1,0|0,1,0","gNN":"-1,1,-1|0,1,0","gNE":"0,1,-1|0,1,0",
+  "gWW":"-1,1,1|0,1,0","gCC":"0,1,0|0,1,0","gEE":"1,1,-1|0,1,0",
+  "gSW":"0,1,1|0,1,0","gSS":"1,1,1|0,1,0","gSE":"1,1,0|0,1,0",
+  "oNW":"-1,1,-1|0,0,-1","oNN":"-1,0,-1|0,0,-1","oNE":"-1,-1,-1|0,0,-1",
+  "oWW":"0,1,-1|0,0,-1","oCC":"0,0,-1|0,0,-1","oEE":"0,-1,-1|0,0,-1",
+  "oSW":"1,1,-1|0,0,-1","oSS":"1,0,-1|0,0,-1","oSE":"1,-1,-1|0,0,-1",
+  "rNW":"-1,1,1|0,0,1","rNN":"0,1,1|0,0,1","rNE":"1,1,1|0,0,1",
+  "rWW":"-1,0,1|0,0,1","rCC":"0,0,1|0,0,1","rEE":"1,0,1|0,0,1",
+  "rSW":"-1,-1,1|0,0,1","rSS":"0,-1,1|0,0,1","rSE":"1,-1,1|0,0,1",
+  "wNW":"1,1,1|1,0,0","wNN":"1,1,0|1,0,0","wNE":"1,1,-1|1,0,0",
+  "wWW":"1,0,1|1,0,0","wCC":"1,0,0|1,0,0","wEE":"1,0,-1|1,0,0",
+  "wSW":"1,-1,1|1,0,0","wSS":"1,-1,0|1,0,0","wSE":"1,-1,-1|1,0,0",
+  "bNW":"0,-1,1|0,-1,0","bNN":"1,-1,1|0,-1,0","bNE":"1,-1,0|0,-1,0",
+  "bWW":"-1,-1,1|0,-1,0","bCC":"0,-1,0|0,-1,0","bEE":"1,-1,-1|0,-1,0",
+  "bSW":"-1,-1,0|0,-1,0","bSS":"-1,-1,-1|0,-1,0","bSE":"0,-1,-1|0,-1,0"
+};
 let slotColor={};
 function reset2D(){ slotColor={}; for(const id of MEMBERSHIP.keys()) slotColor[id]=COLORS[id[0]]; }
 reset2D();
-function faceMapping(prefix,counter) {
-  const f=FS[prefix], map=[];
-  if(counter){
-    map.push([f.NW,f.SW],[f.NE,f.NW],[f.SE,f.NE],[f.SW,f.SE]);
-    map.push([f.W,f.S],[f.N,f.W],[f.E,f.N],[f.S,f.E]);
-  } else {
-    map.push([f.SW,f.NW],[f.NW,f.NE],[f.NE,f.SE],[f.SE,f.SW]);
-    map.push([f.S,f.W],[f.W,f.N],[f.N,f.E],[f.E,f.S]);
-  }
-  return map;
-}
-
 // ---------- seven-stage rule solver (independent of history) ----------
 // The solver has its own exact 54-sticker permutation model generated from
 // the same 3D face rotations as the rigid cube.  It therefore plans from the
@@ -378,6 +401,84 @@ for(const f of "URFDLB"){
   for(let i=0;i<RULE_N;i++) p[i]=a[a[i]];
   RULE_PERM[f+"2"]=p;
 }
+const GRAPH_TO_RULE={};
+const RULE_TO_GRAPH=new Map();
+for(const [graphId,key] of Object.entries(GRAPH_RULE_KEY)){
+  const idx=RULE_IDX[key];
+  if(idx===undefined) throw new Error(`Unknown physical sticker for graph slot ${graphId}: ${key}`);
+  GRAPH_TO_RULE[graphId]=idx;
+  if(RULE_TO_GRAPH.has(idx)) throw new Error(`Duplicate physical sticker projection at ${graphId}`);
+  RULE_TO_GRAPH.set(idx,graphId);
+}
+function commonGraphRing(a,b){
+  const bm=MEMBERSHIP.get(b)||[];
+  for(const x of MEMBERSHIP.get(a)||[]){
+    if(bm.some(y=>y.family===x.family&&y.kind===x.kind)) return x.family+x.kind;
+  }
+  return null;
+}
+function graphSegmentLength(seg){
+  const [family,kind]=RING_META[seg.ring], c=FAMILY[family].c, r=RADIUS[kind];
+  const p0=SLOT_POS[seg.src], p1=SLOT_POS[seg.dst];
+  const a0=Math.atan2(p0[1]-c[1],p0[0]-c[0]), a1=Math.atan2(p1[1]-c[1],p1[0]-c[0]);
+  return Math.abs(normAngle(a1-a0))*r;
+}
+function graphRoute(src,dst){
+  const direct=commonGraphRing(src,dst);
+  if(direct) return [{src,dst,ring:direct}];
+
+  // A face-corner turn is not always contained in one of the nine visible
+  // circles. Route it through the corresponding edge slot instead of leaving
+  // the drawn graph. This keeps the pearl on visible rings for the full move.
+  let best=null, bestCost=Infinity;
+  for(const mid of Object.keys(GRAPH_TO_RULE)){
+    if(mid[0]!==src[0]||mid===src||mid===dst||mid.slice(1)==="CC") continue;
+    const r0=commonGraphRing(src,mid), r1=commonGraphRing(mid,dst);
+    if(!r0||!r1) continue;
+    const route=[{src,dst:mid,ring:r0},{src:mid,dst,ring:r1}];
+    const cost=route.reduce((n,seg)=>n+graphSegmentLength(seg),0);
+    if(cost<bestCost){best=route;bestCost=cost;}
+  }
+  if(!best) throw new Error(`No visible ring route: ${src} -> ${dst}`);
+  return best;
+}
+function graphMovesFor(face,inverse=false){
+  const perm=RULE_PERM[face+(inverse?"'":"")], moves=[];
+  for(const src of Object.keys(GRAPH_TO_RULE)){
+    const dst=RULE_TO_GRAPH.get(perm[GRAPH_TO_RULE[src]]);
+    if(!dst) throw new Error(`Projection lost destination for ${face}: ${src}`);
+    if(dst===src) continue;
+    moves.push({src,dst,route:graphRoute(src,dst),color:slotColor[src]});
+  }
+  return moves;
+}
+function verifyGraphProjection(){
+  const errors=[], graphIds=Object.keys(GRAPH_TO_RULE);
+  if(graphIds.length!==54) errors.push(`expected 54 graph slots, got ${graphIds.length}`);
+  if(new Set(Object.values(GRAPH_TO_RULE)).size!==54) errors.push("projection is not bijective");
+  let checked=0;
+  for(const face of "URFDLB"){
+    for(const inverse of [false,true]){
+      const moves=graphMovesFor(face,inverse);
+      const side=moves.filter(m=>m.src[0]!==m.dst[0]), own=moves.filter(m=>m.src[0]===m.dst[0]);
+      const sideRings=new Set(side.flatMap(m=>m.route.map(seg=>seg.ring)));
+      const twoLeg=own.filter(m=>m.route.length===2);
+      if(moves.length!==20) errors.push(`${face}${inverse?"'":""}: expected 20 moving stickers, got ${moves.length}`);
+      if(side.length!==12||own.length!==8) errors.push(`${face}${inverse?"'":""}: expected 12 side + 8 face stickers`);
+      if(side.some(m=>m.route.length!==1)||sideRings.size!==1) errors.push(`${face}${inverse?"'":""}: side stickers must share one direct ring`);
+      if(twoLeg.length!==4) errors.push(`${face}${inverse?"'":""}: expected four face stickers to use two-ring routes, got ${twoLeg.length}`);
+      if(moves.some(m=>m.route.length<1||m.route.length>2||m.route.some(seg=>!seg.ring))) errors.push(`${face}${inverse?"'":""}: every path must stay on one or two visible rings`);
+      checked++;
+    }
+    const q=RULE_PERM[face], qi=RULE_PERM[face+"'"];
+    for(let i=0;i<RULE_N;i++) if(qi[q[i]]!==i) errors.push(`${face}: inverse permutation mismatch at ${i}`);
+  }
+  return {ok:errors.length===0,errors,checked};
+}
+const GRAPH_MODEL_CHECK=verifyGraphProjection();
+if(!GRAPH_MODEL_CHECK.ok) console.error("Graph projection self-check failed",GRAPH_MODEL_CHECK.errors);
+else console.info(`Graph projection: ${GRAPH_MODEL_CHECK.checked}/12 move variants verified; all paths stay on visible rings`);
+
 function ruleAlgPerm(alg){
   let p=Array.from({length:RULE_N},(_,i)=>i);
   for(const m of alg) p=ruleCompose(p,RULE_PERM[m]);
@@ -608,8 +709,6 @@ function ruleSolveStages(initial){
 }
 let solverState=ruleIdentity();
 let rulePlan=null, rulePlanCursor=0, rulePlanning=false;
-function graphInverseForCube(face,inverse){ return inverse !== "URF".includes(face); }
-
 // ---------- rigid-body cube state ----------
 function matIdentity(){ return [1,0,0, 0,1,0, 0,0,1]; }
 function matVec(m,v){
@@ -677,40 +776,37 @@ function applyCube(face,inverse){
 
 // ---------- animation queue ----------
 let queue=[], anim=null, history=[];
-function ringPoint(srcId,dstId,ringName,inverse,t){
-  const [family,kind]=RING_META[ringName], c=FAMILY[family].c, radius=RADIUS[kind];
-  const p0=SLOT_POS[srcId], p1=SLOT_POS[dstId];
-  const a0=Math.atan2(p0[1]-c[1], p0[0]-c[0]), a1=Math.atan2(p1[1]-c[1], p1[0]-c[0]);
-  let delta=normAngle(a1-a0);
-  if(!inverse){ while(delta<=0) delta+=Math.PI*2; }
-  else { while(delta>=0) delta-=Math.PI*2; }
-  const a=a0+delta*t;
-  return [c[0]+Math.cos(a)*radius, c[1]+Math.sin(a)*radius];
+function graphSegmentPoint(seg,t){
+  const p0=SLOT_POS[seg.src], p1=SLOT_POS[seg.dst];
+  const [family,kind]=RING_META[seg.ring], c=FAMILY[family].c, r=RADIUS[kind];
+  const a0=Math.atan2(p0[1]-c[1],p0[0]-c[0]), a1=Math.atan2(p1[1]-c[1],p1[0]-c[0]);
+  const delta=normAngle(a1-a0), a=a0+delta*t;
+  return [c[0]+Math.cos(a)*r,c[1]+Math.sin(a)*r];
+}
+function graphPathPoint(move,t){
+  const lengths=move.route.map(graphSegmentLength), total=lengths.reduce((a,b)=>a+b,0);
+  let d=t*total;
+  for(let i=0;i<move.route.length;i++){
+    const len=lengths[i];
+    if(d<=len||i===move.route.length-1) return graphSegmentPoint(move.route[i],len?Math.min(1,d/len):1);
+    d-=len;
+  }
+  return SLOT_POS[move.dst];
 }
 function buildAnimation(face,inverse,kind,recordMove,stageIndex=null){
-  const meta=MOVE_META[face], ring=RINGS[meta.ring], ringMoves=[];
-  // The original 2D graph uses a mirrored convention on U/R/F.  Mapping it
-  // here makes the graph and the rigid 3D cube represent the same group state.
-  const graphInverse=graphInverseForCube(face,inverse);
-  for(let i=0;i<12;i++){
-    const j=(i+(graphInverse?-3:3)+12)%12;
-    ringMoves.push({src:ring[i],dst:ring[j],color:slotColor[ring[i]]});
-  }
-  let faceCounter=graphInverse; if(["D","B","L"].includes(face)) faceCounter=!faceCounter;
-  const faceMoves=faceMapping(meta.face,faceCounter).map(([src,dst])=>({src,dst,color:slotColor[src]}));
+  const graphMoves=graphMovesFor(face,inverse);
+  const activeRings=[...new Set(graphMoves.flatMap(m=>m.route.map(seg=>seg.ring)))];
   const speed=Number(document.getElementById('speed').value)||.35;
   const base=kind==="scramble"?300:kind==="solve"?500:750;
-  return { face,inverse,graphInverse,kind,recordMove,stageIndex,ringName:meta.ring,ringMoves,faceMoves,start:performance.now(),duration:base/speed };
+  return {face,inverse,kind,recordMove,stageIndex,graphMoves,activeRings,start:performance.now(),duration:base/speed};
 }
 function finishAnimation(){
-  const a=anim, old={...slotColor}, ring=RINGS[a.ringName];
-  for(let i=0;i<12;i++) { const j=(i+(a.graphInverse?-3:3)+12)%12; slotColor[ring[j]]=old[ring[i]]; }
-  for(const m of a.faceMoves) slotColor[m.dst]=old[m.src];
+  const a=anim, old={...slotColor};
+  for(const m of a.graphMoves) slotColor[m.dst]=old[m.src];
   applyCube(a.face,a.inverse);
   solverState=ruleApplyState(solverState,RULE_PERM[a.face+(a.inverse?"'":"")]);
   if(a.recordMove) history.push(a.face+(a.inverse?"'":""));
-  const finishedStage=a.stageIndex;
-  const nextStage=queue.length?queue[0].stageIndex:null;
+  const finishedStage=a.stageIndex, nextStage=queue.length?queue[0].stageIndex:null;
   if(finishedStage!=null&&nextStage!==finishedStage){ markRuleStageDone(finishedStage); rulePlanCursor=Math.max(rulePlanCursor,finishedStage+1); }
   anim=null; kick();
 }
@@ -730,7 +826,7 @@ function kick(){
 }
 function syncButtons(){
   const busy=!!anim||queue.length>0||rulePlanning;
-  ["scramble","solve","nextStage","reset"].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=busy;});
+  ["scramble","solve","nextStage","reset","playAlgorithm"].forEach(id=>{const e=document.getElementById(id);if(e)e.disabled=busy;});
   document.querySelectorAll('#moves button').forEach(b=>b.disabled=busy);
 }
 function resetAll(){
@@ -929,31 +1025,28 @@ function drawCircleGraph(progress){
   const rect=resizeCanvas(graphCanvas, gctx), w=rect.width, h=rect.height;
   gctx.clearRect(0,0,w,h);
   const bg=gctx.createRadialGradient(w*.50,h*.46,0,w*.50,h*.46,Math.max(w,h)*.62);bg.addColorStop(0,'rgba(255,255,255,.22)');bg.addColorStop(1,'rgba(113,91,66,.025)');gctx.fillStyle=bg;gctx.fillRect(0,0,w,h);
-  const t=graphTransform(w,h), activeRing=anim?anim.ringName:null;
+  const t=graphTransform(w,h), activeRings=new Set(anim?anim.activeRings:[]);
   for(const family of ["Top","Left","Right"]){
     for(const kind of ["Inner","Middle","Outer"]){
       const ringName=family+kind, c=gp(FAMILY[family].c, w, h);
       gctx.beginPath(); gctx.arc(c.x, c.y, RADIUS[kind]*t.s, 0, Math.PI*2);
-      const hot=ringName===activeRing;
+      const hot=activeRings.has(ringName);
       if(hot){
         gctx.save();gctx.strokeStyle='rgba(118,86,48,.13)';gctx.lineWidth=7;gctx.stroke();gctx.restore();
         gctx.strokeStyle='rgba(57,47,38,.90)';gctx.lineWidth=2.2;
-      }else{
-        gctx.strokeStyle='rgba(92,82,70,.35)';gctx.lineWidth=.95;
-      }
+      }else{ gctx.strokeStyle='rgba(92,82,70,.35)';gctx.lineWidth=.95; }
       gctx.stroke();
     }
   }
-  const moving=new Set();
-  if(anim){ for(const m of anim.ringMoves) moving.add(m.src); for(const m of anim.faceMoves) moving.add(m.src); }
-  const rr=Math.max(5.3, 8.8*t.s);
+  const moving=new Set(anim?anim.graphMoves.map(m=>m.src):[]), rr=Math.max(5.3, 8.8*t.s);
   for(const id of MEMBERSHIP.keys()){
     if(moving.has(id)) continue;
     const p=gp(SLOT_POS[id], w, h); drawDot(p.x,p.y,rr,slotColor[id],false);
   }
   if(anim){
-    for(const m of anim.ringMoves){ const q=ringPoint(m.src,m.dst,anim.ringName,anim.graphInverse,progress), p=gp(q,w,h); drawDot(p.x,p.y,rr*1.04,m.color,true); }
-    for(const m of anim.faceMoves){ const a=SLOT_POS[m.src], b=SLOT_POS[m.dst], q=[a[0]+(b[0]-a[0])*progress, a[1]+(b[1]-a[1])*progress], p=gp(q,w,h); drawDot(p.x,p.y,rr*1.04,m.color,true); }
+    for(const m of anim.graphMoves){
+      const q=graphPathPoint(m,progress), p=gp(q,w,h); drawDot(p.x,p.y,rr*1.04,m.color,true);
+    }
   }
 }
 
@@ -961,6 +1054,59 @@ function updateMoveBadges(move){
   for(const id of ['cubeMoveBadge','graphMoveBadge']){
     const el=document.getElementById(id);if(!el)continue;
     if(move){el.textContent=move;el.classList.add('show');}else el.classList.remove('show');
+  }
+}
+
+function parseAlgorithmText(text){
+  const normalized=text.replace(/′/g,"'").trim();
+  if(!normalized) return [];
+  const moves=normalized.split(/\s+/);
+  for(const m of moves) if(!/^[URFDLB](?:2|')?$/.test(m)) throw new Error(`Неизвестный ход: ${m}`);
+  return moves;
+}
+function algorithmKind(alg){
+  if(alg.length===4&&ruleInvMove(alg[0])===alg[2]&&ruleInvMove(alg[1])===alg[3]) return `коммутатор [${alg[0]}, ${alg[1]}]`;
+  if(alg.length===3&&ruleInvMove(alg[0])===alg[2]) return `сопряжение ${alg[0]} · ${alg[1]} · ${alg[2]}`;
+  return "последовательность ходов";
+}
+function graphCyclesForAlgorithm(alg){
+  const perm=ruleAlgPerm(alg), seen=new Set(), cycles=[];
+  for(const start of Object.keys(GRAPH_TO_RULE)){
+    if(seen.has(start)) continue;
+    const cycle=[]; let cur=start;
+    while(!seen.has(cur)){
+      seen.add(cur); cycle.push(cur);
+      const dstRule=perm[GRAPH_TO_RULE[cur]];
+      cur=RULE_TO_GRAPH.get(dstRule);
+      if(!cur) throw new Error("Перестановка вышла за проекцию графа");
+    }
+    if(cycle.length>1) cycles.push(cycle);
+  }
+  return cycles.sort((a,b)=>b.length-a.length);
+}
+function inspectAlgorithm(){
+  const summary=document.getElementById("algorithmSummary"), out=document.getElementById("algorithmCycles");
+  try{
+    const alg=parseAlgorithmText(document.getElementById("algorithmInput").value);
+    const cycles=graphCyclesForAlgorithm(alg), affected=cycles.reduce((n,c)=>n+c.length,0);
+    summary.textContent=`${algorithmKind(alg)} · ${cycles.length} нетривиальных циклов · ${affected} наклеек движутся`;
+    out.textContent=cycles.length?cycles.map(c=>`(${c.join(" → ")})`).join("\n"):"Тождественная перестановка: все наклейки остаются на месте.";
+  }catch(e){ summary.textContent="Ошибка в записи алгоритма"; out.textContent=e.message; }
+}
+function renderGraphModelStatus(){
+  const el=document.getElementById("graphModelStatus");
+  if(GRAPH_MODEL_CHECK.ok){ el.textContent=`✓ RULE_PERM · ${GRAPH_MODEL_CHECK.checked}/12`; el.title="Все четверть-повороты и обратные ходы прошли проверку проекции."; }
+  else { el.textContent="⚠ ошибка проекции"; el.title=GRAPH_MODEL_CHECK.errors.join("\n"); }
+}
+function playInspectedAlgorithm(){
+  try{
+    const alg=parseAlgorithmText(document.getElementById("algorithmInput").value);
+    if(!alg.length) return;
+    invalidateRulePlan();
+    for(const m of alg) enqueueMove(m,"manual",true);
+  }catch(e){
+    document.getElementById("algorithmSummary").textContent="Ошибка в записи алгоритма";
+    document.getElementById("algorithmCycles").textContent=e.message;
   }
 }
 
@@ -1040,7 +1186,15 @@ document.getElementById('nextStage').onclick=playNextRuleStage;
 document.getElementById('solve').onclick=playAllRuleStages;
 document.getElementById('reset').onclick=resetAll;
 document.getElementById('speed').oninput=e=>{ document.getElementById('speedVal').textContent=Number(e.target.value).toFixed(2).replace(/0+$/,'').replace(/\.$/,'')+'×'; };
-window.addEventListener('keydown', e=>{ const k=e.key.toUpperCase(); if(!"URFDLB".includes(k)) return; invalidateRulePlan(); enqueueQuarter(k,e.shiftKey,'manual',true); });
+document.getElementById('inspectAlgorithm').onclick=inspectAlgorithm;
+document.getElementById('playAlgorithm').onclick=playInspectedAlgorithm;
+document.getElementById('algorithmInput').addEventListener('keydown',e=>{if(e.key==="Enter") inspectAlgorithm();});
+renderGraphModelStatus();
+inspectAlgorithm();
+window.addEventListener('keydown', e=>{
+  if(e.target&&["INPUT","TEXTAREA"].includes(e.target.tagName)) return;
+  const k=e.key.toUpperCase(); if(!"URFDLB".includes(k)) return; invalidateRulePlan(); enqueueQuarter(k,e.shiftKey,'manual',true);
+});
 
 // ---------- loop ----------
 function tick(now){
