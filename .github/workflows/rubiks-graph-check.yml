@@ -1,0 +1,58 @@
+name: Rubik graph check
+
+on:
+  push:
+    paths:
+      - rubiks-graph/index.html
+      - .github/workflows/rubiks-graph-check.yml
+  pull_request:
+    paths:
+      - rubiks-graph/index.html
+      - .github/workflows/rubiks-graph-check.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Extract scripts and model harness
+        shell: python
+        run: |
+          from pathlib import Path
+
+          html = Path("rubiks-graph/index.html").read_text()
+          script = html.split("<script>", 1)[1].split("</script>", 1)[0]
+          Path("/tmp/rubiks.js").write_text(script)
+
+          marker = "// ---------- rigid-body cube state ----------"
+          model = script.split(marker, 1)[0]
+          model += r"""
+          if (!GRAPH_MODEL_CHECK.ok) {
+            throw new Error("graph projection failed: " + GRAPH_MODEL_CHECK.errors.join("; "));
+          }
+          if (GRAPH_MODEL_CHECK.checked !== 12) {
+            throw new Error("expected 12 verified quarter-turn variants");
+          }
+
+          const smokeAlg = ["R", "U", "R'", "U'"];
+          const smokePerm = ruleAlgPerm(smokeAlg);
+          let moved = 0;
+          for (const [graphId, ruleId] of Object.entries(GRAPH_TO_RULE)) {
+            if (RULE_TO_GRAPH.get(smokePerm[ruleId]) !== graphId) moved++;
+          }
+          if (moved !== 18) {
+            throw new Error("R U R' U' should move 18 stickers, got " + moved);
+          }
+          console.log("projection OK; 12/12 moves; commutator moves", moved, "stickers");
+          """
+          Path("/tmp/rubiks-model.js").write_text(model)
+      - name: JavaScript syntax
+        run: node --check /tmp/rubiks.js
+      - name: Permutation model smoke test
+        run: node /tmp/rubiks-model.js
