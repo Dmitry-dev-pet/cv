@@ -354,14 +354,6 @@ const GRAPH_RULE_KEY = {
   "bWW":"-1,-1,1|0,-1,0","bCC":"0,-1,0|0,-1,0","bEE":"1,-1,-1|0,-1,0",
   "bSW":"-1,-1,0|0,-1,0","bSS":"-1,-1,-1|0,-1,0","bSE":"0,-1,-1|0,-1,0"
 };
-const FACE_CENTROID={};
-for(const prefix of ["y","g","o","r","w","b"]){
-  const ids=Object.keys(SLOT_POS).filter(id=>id[0]===prefix);
-  FACE_CENTROID[prefix]=[
-    ids.reduce((a,id)=>a+SLOT_POS[id][0],0)/ids.length,
-    ids.reduce((a,id)=>a+SLOT_POS[id][1],0)/ids.length
-  ];
-}
 let slotColor={};
 function reset2D(){ slotColor={}; for(const id of MEMBERSHIP.keys()) slotColor[id]=COLORS[id[0]]; }
 reset2D();
@@ -431,8 +423,8 @@ function graphMovesFor(face,inverse=false){
     const dst=RULE_TO_GRAPH.get(perm[GRAPH_TO_RULE[src]]);
     if(!dst) throw new Error(`Projection lost destination for ${face}: ${src}`);
     if(dst===src) continue;
-    const sameFace=src[0]===dst[0], ring=sameFace?null:commonGraphRing(src,dst);
-    if(!sameFace&&!ring) throw new Error(`No circular path for ${face}: ${src} -> ${dst}`);
+    const ring=commonGraphRing(src,dst);
+    if(!ring) throw new Error(`No visible circular path for ${face}: ${src} -> ${dst}`);
     moves.push({src,dst,ring,color:slotColor[src]});
   }
   return moves;
@@ -446,10 +438,11 @@ function verifyGraphProjection(){
     for(const inverse of [false,true]){
       const moves=graphMovesFor(face,inverse);
       const side=moves.filter(m=>m.src[0]!==m.dst[0]), own=moves.filter(m=>m.src[0]===m.dst[0]);
-      const rings=new Set(side.map(m=>m.ring));
+      const sideRings=new Set(side.map(m=>m.ring));
       if(moves.length!==20) errors.push(`${face}${inverse?"'":""}: expected 20 moving stickers, got ${moves.length}`);
-      if(side.length!==12||own.length!==8) errors.push(`${face}${inverse?"'":""}: expected 12 ring + 8 face stickers`);
-      if(rings.size!==1) errors.push(`${face}${inverse?"'":""}: expected one active ring, got ${[...rings].join(",")}`);
+      if(side.length!==12||own.length!==8) errors.push(`${face}${inverse?"'":""}: expected 12 side + 8 face stickers`);
+      if(sideRings.size!==1) errors.push(`${face}${inverse?"'":""}: expected one side ring, got ${[...sideRings].join(",")}`);
+      if(moves.some(m=>!m.ring)) errors.push(`${face}${inverse?"'":""}: every moving sticker must stay on a visible ring`);
       checked++;
     }
     const q=RULE_PERM[face], qi=RULE_PERM[face+"'"];
@@ -760,15 +753,9 @@ function applyCube(face,inverse){
 let queue=[], anim=null, history=[];
 function graphPathPoint(move,t){
   const p0=SLOT_POS[move.src], p1=SLOT_POS[move.dst];
-  let c,r0,r1;
-  if(move.ring){
-    const [family,kind]=RING_META[move.ring]; c=FAMILY[family].c; r0=r1=RADIUS[kind];
-  }else{
-    c=FACE_CENTROID[move.src[0]];
-    r0=Math.hypot(p0[0]-c[0],p0[1]-c[1]); r1=Math.hypot(p1[0]-c[0],p1[1]-c[1]);
-  }
+  const [family,kind]=RING_META[move.ring], c=FAMILY[family].c, r=RADIUS[kind];
   const a0=Math.atan2(p0[1]-c[1],p0[0]-c[0]), a1=Math.atan2(p1[1]-c[1],p1[0]-c[0]);
-  const delta=normAngle(a1-a0), a=a0+delta*t, r=r0+(r1-r0)*t;
+  const delta=normAngle(a1-a0), a=a0+delta*t;
   return [c[0]+Math.cos(a)*r,c[1]+Math.sin(a)*r];
 }
 function buildAnimation(face,inverse,kind,recordMove,stageIndex=null){
