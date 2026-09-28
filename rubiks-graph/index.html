@@ -417,15 +417,39 @@ function commonGraphRing(a,b){
   }
   return null;
 }
+const GRAPH_EDGE_SUFFIX=new Set(["NN","EE","SS","WW"]);
+function graphSegmentLength(seg){
+  const [family,kind]=RING_META[seg.ring], c=FAMILY[family].c, r=RADIUS[kind];
+  const p0=SLOT_POS[seg.src], p1=SLOT_POS[seg.dst];
+  const a0=Math.atan2(p0[1]-c[1],p0[0]-c[0]), a1=Math.atan2(p1[1]-c[1],p1[0]-c[0]);
+  return Math.abs(normAngle(a1-a0))*r;
+}
+function graphRoute(src,dst){
+  const direct=commonGraphRing(src,dst);
+  if(direct) return [{src,dst,ring:direct}];
+
+  // A face-corner turn is not always contained in one of the nine visible
+  // circles. Route it through the corresponding edge slot instead of leaving
+  // the drawn graph. This keeps the pearl on visible rings for the full move.
+  let best=null, bestCost=Infinity;
+  for(const mid of Object.keys(GRAPH_TO_RULE)){
+    if(mid[0]!==src[0]||mid===src||mid===dst||!GRAPH_EDGE_SUFFIX.has(mid.slice(1))) continue;
+    const r0=commonGraphRing(src,mid), r1=commonGraphRing(mid,dst);
+    if(!r0||!r1) continue;
+    const route=[{src,dst:mid,ring:r0},{src:mid,dst,ring:r1}];
+    const cost=route.reduce((n,seg)=>n+graphSegmentLength(seg),0);
+    if(cost<bestCost){best=route;bestCost=cost;}
+  }
+  if(!best) throw new Error(`No visible ring route: ${src} -> ${dst}`);
+  return best;
+}
 function graphMovesFor(face,inverse=false){
   const perm=RULE_PERM[face+(inverse?"'":"")], moves=[];
   for(const src of Object.keys(GRAPH_TO_RULE)){
     const dst=RULE_TO_GRAPH.get(perm[GRAPH_TO_RULE[src]]);
     if(!dst) throw new Error(`Projection lost destination for ${face}: ${src}`);
     if(dst===src) continue;
-    const ring=commonGraphRing(src,dst);
-    if(!ring) throw new Error(`No visible circular path for ${face}: ${src} -> ${dst}`);
-    moves.push({src,dst,ring,color:slotColor[src]});
+    moves.push({src,dst,route:graphRoute(src,dst),color:slotColor[src]});
   }
   return moves;
 }
@@ -438,11 +462,13 @@ function verifyGraphProjection(){
     for(const inverse of [false,true]){
       const moves=graphMovesFor(face,inverse);
       const side=moves.filter(m=>m.src[0]!==m.dst[0]), own=moves.filter(m=>m.src[0]===m.dst[0]);
-      const sideRings=new Set(side.map(m=>m.ring));
+      const sideRings=new Set(side.flatMap(m=>m.route.map(seg=>seg.ring)));
+      const twoLeg=own.filter(m=>m.route.length===2);
       if(moves.length!==20) errors.push(`${face}${inverse?"'":""}: expected 20 moving stickers, got ${moves.length}`);
       if(side.length!==12||own.length!==8) errors.push(`${face}${inverse?"'":""}: expected 12 side + 8 face stickers`);
-      if(sideRings.size!==1) errors.push(`${face}${inverse?"'":""}: expected one side ring, got ${[...sideRings].join(",")}`);
-      if(moves.some(m=>!m.ring)) errors.push(`${face}${inverse?"'":""}: every moving sticker must stay on a visible ring`);
+      if(side.some(m=>m.route.length!==1)||sideRings.size!==1) errors.push(`${face}${inverse?"'":""}: side stickers must share one direct ring`);
+      if(twoLeg.length!==4) errors.push(`${face}${inverse?"'":""}: expected four corner stickers to use two-ring routes, got ${twoLeg.length}`);
+      if(moves.some(m=>m.route.length<1||m.route.length>2||m.route.some(seg=>!seg.ring))) errors.push(`${face}${inverse?"'":""}: every path must stay on one or two visible rings`);
       checked++;
     }
     const q=RULE_PERM[face], qi=RULE_PERM[face+"'"];
@@ -452,7 +478,7 @@ function verifyGraphProjection(){
 }
 const GRAPH_MODEL_CHECK=verifyGraphProjection();
 if(!GRAPH_MODEL_CHECK.ok) console.error("Graph projection self-check failed",GRAPH_MODEL_CHECK.errors);
-else console.info(`Graph projection: ${GRAPH_MODEL_CHECK.checked}/12 move variants verified`);
+else console.info(`Graph projection: ${GRAPH_MODEL_CHECK.checked}/12 move variants verified; all paths stay on visible rings`);
 
 function ruleAlgPerm(alg){
   let p=Array.from({length:RULE_N},(_,i)=>i);
@@ -751,16 +777,26 @@ function applyCube(face,inverse){
 
 // ---------- animation queue ----------
 let queue=[], anim=null, history=[];
-function graphPathPoint(move,t){
-  const p0=SLOT_POS[move.src], p1=SLOT_POS[move.dst];
-  const [family,kind]=RING_META[move.ring], c=FAMILY[family].c, r=RADIUS[kind];
+function graphSegmentPoint(seg,t){
+  const p0=SLOT_POS[seg.src], p1=SLOT_POS[seg.dst];
+  const [family,kind]=RING_META[seg.ring], c=FAMILY[family].c, r=RADIUS[kind];
   const a0=Math.atan2(p0[1]-c[1],p0[0]-c[0]), a1=Math.atan2(p1[1]-c[1],p1[0]-c[0]);
   const delta=normAngle(a1-a0), a=a0+delta*t;
   return [c[0]+Math.cos(a)*r,c[1]+Math.sin(a)*r];
 }
+function graphPathPoint(move,t){
+  const lengths=move.route.map(graphSegmentLength), total=lengths.reduce((a,b)=>a+b,0);
+  let d=t*total;
+  for(let i=0;i<move.route.length;i++){
+    const len=lengths[i];
+    if(d<=len||i===move.route.length-1) return graphSegmentPoint(move.route[i],len?Math.min(1,d/len):1);
+    d-=len;
+  }
+  return SLOT_POS[move.dst];
+}
 function buildAnimation(face,inverse,kind,recordMove,stageIndex=null){
   const graphMoves=graphMovesFor(face,inverse);
-  const activeRings=[...new Set(graphMoves.map(m=>m.ring).filter(Boolean))];
+  const activeRings=[...new Set(graphMoves.flatMap(m=>m.route.map(seg=>seg.ring)))];
   const speed=Number(document.getElementById('speed').value)||.35;
   const base=kind==="scramble"?300:kind==="solve"?500:750;
   return {face,inverse,kind,recordMove,stageIndex,graphMoves,activeRings,start:performance.now(),duration:base/speed};
