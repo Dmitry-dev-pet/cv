@@ -12,6 +12,25 @@
     />
     <script type="module" crossorigin src="/cv/jevspin/assets/index-Dxjg2QjP.js"></script>
     <link rel="stylesheet" crossorigin href="/cv/jevspin/assets/index-C0jeWMF6.css">
+    <style>
+      /* Upstream mobile layout stacks cube + graph but keeps a fixed-height,
+         overflow-hidden stage, which clips the graph below the cube. */
+      @media (max-width: 760px) {
+        .stage {
+          height: auto !important;
+          min-height: 0 !important;
+          overflow: visible !important;
+          grid-template-rows: auto auto auto !important;
+        }
+        .viz-cube,
+        .viz-graph {
+          min-height: 300px !important;
+        }
+        .viz-graph {
+          margin-top: 8px;
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>
